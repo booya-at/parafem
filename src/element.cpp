@@ -49,6 +49,14 @@ void CoordSys::rotate(std::vector< Vector2 > first, std::vector< Vector2 > secon
    t2 = mat.row(1);
 }
 
+void CoordSys::rotate(Eigen::MatrixX2d first, Eigen::MatrixX2d second)
+{
+   Eigen::Matrix2d rot = findRotMat(first.transpose(), second.transpose());
+   mat = rot.transpose() * mat;   //rot.T?
+   t1 = mat.row(0);
+   t2 = mat.row(1);
+}
+
 
 
 Vector2 CoordSys::toLocal(Vector3 vec)
@@ -70,6 +78,14 @@ std::vector< int > Element::getNr()
     return numbers;
 }
 
+
+IntegrationPoint::IntegrationPoint(double eta_in, double zeta_in, double weight_in)
+{
+    eta = eta_in;
+    zeta = zeta_in;
+    weight = weight_in;
+    stress.setZero();
+}
 
 
 Eigen::Matrix2Xd toMatrix(std::vector<Vector2> in)

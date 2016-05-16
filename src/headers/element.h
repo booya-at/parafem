@@ -17,9 +17,8 @@ Eigen::Matrix2d findRotMat(std::vector<Vector2>, std::vector<Vector2>);
 Eigen::Matrix2d findRotMat(Eigen::Matrix2Xd in, Eigen::Matrix2Xd out);
 
 
-class CoordSys: Base
+struct CoordSys: Base
 {
-public:
     CoordSys(){};
     CoordSys(Vector3);
     CoordSys(Vector3, Vector3);
@@ -27,64 +26,80 @@ public:
     Eigen::Matrix<double, 2, 3> mat;            // matrix to transform global(3d) to local(2d)
     Vector3 n, t1, t2;
     void rotate(std::vector<Vector2>, std::vector<Vector2>);
+    void rotate(Eigen::MatrixX2d, Eigen::MatrixX2d);
     void update(Vector3);
     Vector2 toLocal(Vector3);
     Vector3 toGlobal(Vector2);
 };
 
-class Element: Base
+struct IntegrationPoint: Base
 {
-public:
+    IntegrationPoint(double eta, double zeta, double weight);
+    double eta;
+    double zeta;
+    double weight;
+    Vector3 stress;
+};
+
+struct Element: Base
+{
     std::vector<NodePtr> nodes;
     virtual void makeStep(double h) = 0;  // compute the internal forces acting on the nodes.
     std::vector<int> getNr();
+    virtual Vector3 getStress()=0;
 };
 
-class Truss: public Element
+struct Truss: public Element
 {
-public:
     Vector3 pressure;
+    Vector3 tangent;
     double length;
     Truss(std::vector<NodePtr>, std::shared_ptr<TrussMaterial>);
+    virtual Vector3 getStress();
     double stress;           // at timestep n
     virtual void makeStep(double h);
     std::shared_ptr<TrussMaterial> material;
     void addNodalPressure(Vector3);
 };
 
-class Membrane: public Element
+struct Membrane: public Element
 {
-public:
     Vector3 center;
     CoordSys coordSys;
     double area;
     double pressure;                 // pressure acting on internal forces
     void setConstPressure(double);
-    std::vector<Vector2> position;   // storing the local position of all points
-    Vector3 stress;
-    std::vector<Vector2> local_position;
-    std::vector<Vector2> local_velocity;
+    
     std::shared_ptr<MembraneMaterial> material;
-    void addNodalPressure(double);
 };
 
-class Membrane3: public Membrane
+struct Membrane3: public Membrane
 {
-public:
     Membrane3(std::vector<NodePtr>, std::shared_ptr<MembraneMaterial>);
     virtual void makeStep(double h);
+    Vector3 stress;
+    virtual Vector3 getStress();
+
+    Eigen::Matrix<double, 3, 2> pos_mat, vel_mat;
+    Eigen::Matrix<double, 2, 3> B, dN;
 };
 
-class Membrane4: public  Membrane
+struct Membrane4: public  Membrane
 {
-public:
-    Membrane4(std::vector<NodePtr>, std::shared_ptr<MembraneMaterial>);
+    Membrane4(std::vector<NodePtr>, std::shared_ptr<MembraneMaterial>, bool reduced_integration=true);
+    std::vector<IntegrationPoint> integration_points;  //eta, zeta, weight, stress
     virtual void makeStep(double h);
+    
+    // hourglass control
     void initHG();
     Eigen::Vector4d hg_gamma;
     double hg_const;
     Vector2 hg_stress;
-    void addNodalPressure(double);
+    
+    
+    Eigen::Matrix<double, 4, 2> pos_mat, vel_mat;
+    Eigen::Matrix<double, 2, 4> B, dN;
+    virtual Vector3 getStress();
     
 };
 

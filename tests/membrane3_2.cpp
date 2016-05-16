@@ -11,17 +11,21 @@ int main(int argc, char **argv) {
 
     ///////////////----INPUT----////////////////
     // MESH
-    int num_nodes = 50; // num_nodes x num_nodes
+    int num_nodes = 20; // num_nodes x num_nodes
 
     // SIM
     double stepsize = 0.001;
-    int interations = 10000;
-    int num_export = 500;
+    int interations = 20000;
+    int num_export = 100;
+    
     // MATERIAL
     double E = 1000;
     double nue = 0.2;
-    double structural_damping = 0;
-    double velocity_damping = 0.5;
+    double structural_damping = 0.0;
+    double velocity_damping = 1;
+    
+    // FORCE
+    double pressure = 10;
     ////////////////////////////////////////////
 
 
@@ -61,11 +65,13 @@ int main(int argc, char **argv) {
             pos3 = pos2 + num_nodes;
             pos4 = pos3 -1;
             m1 = std::make_shared<paraFEM::Membrane3>(
-                    paraFEM::NodeVec{grid[pos1], grid[pos4], grid[pos3]}, mat);
+                    paraFEM::NodeVec{grid[pos4], grid[pos3], grid[pos1]}, mat);
             m2 = std::make_shared<paraFEM::Membrane3>(
                     paraFEM::NodeVec{grid[pos2], grid[pos1], grid[pos3]}, mat);
-            m1->setConstPressure(1);
-            m2->setConstPressure(1);
+            m1->setConstPressure(pressure);
+            m2->setConstPressure(pressure);
+            m1->coordSys = paraFEM::CoordSys(m1->coordSys.n, paraFEM::Vector3(1, 0, 0));
+            m2->coordSys = paraFEM::CoordSys(m2->coordSys.n, paraFEM::Vector3(1, 0, 0));
             elements.push_back(m1);
             elements.push_back(m2);
         }
@@ -83,6 +89,9 @@ int main(int argc, char **argv) {
     {
         c1->makeStep(stepsize);
         if (i % int(interations / num_export) == 0)
-            writer.writeCase(c1, 0.);
+        {
+            writer.writeCase(c1, 0.3);
+            cout << "time: "<< c1->time << " from " << interations * stepsize << endl;
+        }
     }
 }

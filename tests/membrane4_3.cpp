@@ -15,13 +15,13 @@ int main(int argc, char **argv) {
     // SIM
     double stepsize = 0.0001;
     int interations = 100000;
-    int num_export = 100;
+    int num_export = 200;
     
     // MATERIAL
     double E = 100;
     double nue = 0.0;
     double structural_damping = 0.0;
-    double velocity_damping = 1;
+    double velocity_damping = 0;
     
     // FORCE
     double force = 100;
@@ -36,10 +36,12 @@ int main(int argc, char **argv) {
     paraFEM::NodePtr n4 (new paraFEM::Node(0, 1, 0));
 
     n1->fixed << 0, 0, 0;
-    n4->fixed << 0, 0, 0;
+    n2->fixed << 0, 0, 0;
+    n3->fixed << 1, 0, 0;
+    n4->fixed << 1, 0, 0;
     
-    n2->externalForce << force/2, 0, 0;
     n3->externalForce << force/2, 0, 0;
+    n4->externalForce << force/2, 0, 0;
   
     std::shared_ptr<paraFEM::MembraneMaterial> mat (new paraFEM::MembraneMaterial(E, nue));
     mat->d_structural = structural_damping;
@@ -48,7 +50,7 @@ int main(int argc, char **argv) {
     paraFEM::FemCasePtr c1 (new paraFEM::FemCase(paraFEM::ElementVec{m1}));
 
     c1->d_velocity = velocity_damping;
-    VtkWriter writer = VtkWriter("/tmp/paraFEM/membrane4_1/output");
+    VtkWriter writer = VtkWriter("/tmp/paraFEM/membrane4_3/output");
 
     for (int i=0; i<interations; i++)
     {
@@ -58,6 +60,5 @@ int main(int argc, char **argv) {
     }
     cout << "spannung in x richtung: " << m1->getStress().x() << endl;
     cout << "spannung in y richtung: " << m1->getStress().y() << endl;
-    cout << "verschiebung in x richtung: " << n2->position.x()-1 << endl;
-    cout << "fehler bei der Verschiebung: " << n2->position.x() - 2.718281828459  << endl;
+    cout << "verschiebung in x richtung: " << n3->position.x()-1 << endl;
 }

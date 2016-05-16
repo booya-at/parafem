@@ -16,14 +16,16 @@ target_link_libraries(truss2 paraFEM vtkwriter)
 add_executable(membrane3_1 membrane3_1.cpp)
 target_link_libraries(membrane3_1 paraFEM vtkwriter)
 
-
 add_executable(membrane3_2 membrane3_2.cpp)
 target_link_libraries(membrane3_2 paraFEM vtkwriter)
 
-
+# normal spannungen
 add_executable(membrane4_1 membrane4_1.cpp)
 target_link_libraries(membrane4_1 paraFEM vtkwriter)
 
-
 add_executable(membrane4_2 membrane4_2.cpp)
 target_link_libraries(membrane4_2 paraFEM vtkwriter)
+
+# scherspannungen
+add_executable(membrane4_3 membrane4_3.cpp)
+target_link_libraries(membrane4_3 paraFEM vtkwriter)

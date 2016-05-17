@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
         if (i % int(interations / num_export) == 0)
         {
             writer.writeCase(c1);
-            cout << "time: "<< c1->time << " from " << interations * stepsize << endl;
+            cout << "time: "<< c1->time << " of " << interations * stepsize << endl;
         }
     }
 }

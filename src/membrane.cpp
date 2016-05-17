@@ -58,7 +58,6 @@ void Membrane3::makeStep(double h)
     for (auto node: nodes)
     {
         new_pos_mat.row(row_count) = coordSys.toLocal(node->position - center);
-        vel_mat.row(row_count) = coordSys.toLocal(node->velocity);
         row_count ++;
     }
     
@@ -69,6 +68,7 @@ void Membrane3::makeStep(double h)
     for (auto node: nodes)
     {
         pos_mat.row(row_count) = coordSys.toLocal(node->position - center);
+        vel_mat.row(row_count) = coordSys.toLocal(node->velocity);
         row_count ++;
     }
 
@@ -140,8 +140,8 @@ Membrane4::Membrane4(std::vector<NodePtr> points,
     }
     if (reduced_integration)
     {
-        initHG();
         integration_points.push_back(IntegrationPoint(0, 0, 1));
+        initHG();
     }
     else
     {
@@ -171,7 +171,7 @@ void Membrane4::initHG()
     Eigen::Vector4d B0 =  B.row(0);
     Eigen::Vector4d B1 = B.row(1);
 
-    hg_const = 1. / 8. * 0.03 * (material->C(0,0) * area) * (B0.dot(B0) + B1.dot(B1)) * 500.;
+    hg_const = 1. / 8. * 0.03 * (material->C(0,0) * area) * (B0.dot(B0) + B1.dot(B1));
     hg_gamma = h - (h.dot(pos_mat.col(0)) * B0 + h.dot(pos_mat.col(0)) * B1);
 }
     
@@ -198,7 +198,6 @@ void Membrane4::makeStep(double h)
     for (auto node: nodes)
     {
         new_pos_mat.row(row_count) = coordSys.toLocal(node->position - center);
-        vel_mat.row(row_count) = coordSys.toLocal(node->velocity);
         row_count ++;
     }
     
@@ -210,6 +209,7 @@ void Membrane4::makeStep(double h)
     for (auto node: nodes)
     {
         pos_mat.row(row_count) = coordSys.toLocal(node->position - center);
+        vel_mat.row(row_count) = coordSys.toLocal(node->velocity);
         row_count ++;
     }
     
@@ -217,29 +217,26 @@ void Membrane4::makeStep(double h)
     // 3: strain rate
 
     Vector3 strain_rate;
-    strain_rate.setZero();
-
+    Vector3 stress_rate;
     Vector2 local_node_force;
+
     for (IntegrationPoint& int_point: integration_points)
     {
-        double eta = int_point.eta;
-        double zeta = int_point.zeta;
-        double weight = int_point.weight;
+        strain_rate.setZero();
         
-        dN <<  1 - zeta, 1 + zeta, -1 - zeta, -1 + zeta,
-               -1 - eta, 1 + eta, 1 - eta, -1 + eta;
+        dN <<  1 + int_point.zeta, 1 - int_point.zeta, -1 + int_point.zeta, -1 - int_point.zeta, 
+               1 + int_point.eta, -1 - int_point.eta, -1 + int_point.eta, 1 - int_point.eta;
         dN /= -4;
         B = (dN * pos_mat).inverse() * dN;
-        strain_rate.setZero();
+
         for (int i = 0; i < nodes.size(); i++)
         {
-            strain_rate += weight * Vector3(B(0,i) * vel_mat(i, 0),
-                                            B(1,i) * vel_mat(i, 1),
-                                            10 * B(0,i) * vel_mat(i, 1) +
-                                            10 * B(1,i) * vel_mat(i, 0));
+            strain_rate += Vector3(B(0,i) * vel_mat(i, 0),
+                                B(1,i) * vel_mat(i, 1),
+                                B(0,i) * vel_mat(i, 1) +
+                                B(1,i) * vel_mat(i, 0));
         }
         // 4: stress rate (hook)
-        Vector3 stress_rate;
         stress_rate = material->C * strain_rate;
 
         // 5: integrate sigma
@@ -248,15 +245,17 @@ void Membrane4::makeStep(double h)
 
         // 6: nodal forces due to internal work
         Vector2 local_node_force;
+        
         for (int i = 0; i < nodes.size(); i++)
-        {
-            local_node_force.setZero();
-            local_node_force.x() += B(0, i) * (local_force(0) + material->d_structural * strain_rate(0));
-                                 +  B(1, i) * (local_force(2) + material->d_structural * strain_rate(2));
-            local_node_force.y() += B(1, i) * (local_force(1) + material->d_structural * strain_rate(1));
-                                 +  B(0, i) * (local_force(2) + material->d_structural * strain_rate(2));
-            nodes[i]->internalForce += coordSys.toGlobal(local_node_force);
-        }
+            {
+                local_node_force.setZero();
+                local_node_force.x() += B(0, i) * (local_force(0) + material->d_structural * strain_rate(0))
+                                    +  B(1, i) * (local_force(2) + material->d_structural * strain_rate(2));
+                local_node_force.y() += B(1, i) * (local_force(1) + material->d_structural * strain_rate(1))
+                                        +  B(0, i) * (local_force(2) + material->d_structural * strain_rate(2));
+                nodes[i]->internalForce += coordSys.toGlobal(local_node_force);
+            }
+
     }
     // 7: hourglasscontrol
     if (integration_points.size() == 1)
@@ -278,7 +277,7 @@ Vector3 Membrane4::getStress()
     Vector3 stress;
     stress.setZero();
     for (auto int_point: integration_points)
-        stress += int_point.stress;
+        stress += int_point.stress * int_point.weight;
     return stress;
 };
 

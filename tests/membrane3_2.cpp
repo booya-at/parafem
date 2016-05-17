@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
     double rho = 0.1;
     
     // FORCE
-    double pressure = 50;
+    double pressure = 10;
     ////////////////////////////////////////////
 
 
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
         c1->makeStep(stepsize);
         if (i % int(interations / num_export) == 0)
         {
-            writer.writeCase(c1, 0.3);
+            writer.writeCase(c1);
             cout << "time: "<< c1->time << " from " << interations * stepsize << endl;
         }
     }

@@ -9,24 +9,24 @@
 
 int main(int argc, char **argv) {
 
-
     ///////////////----INPUT----////////////////
     // MESH
-    int num_nodes = 10; // num_nodes x num_nodes
+    int num_nodes = 40; // num_nodes x num_nodes
 
     // SIM
-    double stepsize = 0.0005;
-    int interations = 60000;
-    int num_export = 200;
+    double stepsize = 0.005;
+    int interations = 500;
+    int num_export = 100;
     
     // MATERIAL
     double E = 1000;
     double nue = 0.3;
-    double structural_damping = 50;
-    double velocity_damping = 0.02;
+    double structural_damping = 1. / E;
+    double velocity_damping = 0.5;
+    double rho = 0.1;
     
     // FORCE
-    double pressure = 1;
+    double pressure = 50;
     ////////////////////////////////////////////
 
 
@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 
     paraFEM::MembraneMaterialPtr mat (new paraFEM::MembraneMaterial(E, nue));
     mat->d_structural = structural_damping;
-    mat->rho = 0.1;
+    mat->rho = rho;
 
     // NODES
     for (int x=0; x < num_nodes; x++)
@@ -52,13 +52,8 @@ int main(int argc, char **argv) {
         for (int y=0; y < num_nodes; y++)
         {
             grid.push_back(std::make_shared<paraFEM::Node>(x, y, 0));
-            if (x==0)
-                grid.back()->fixed = paraFEM::Vector3(0,0,0);
-            if ( x == num_nodes-1)
-            {
-                grid.back()->fixed << 1, 0, 0;
-                grid.back()->externalForce << 2, 0, 0;
-            }
+            if (x==0 or x==num_nodes-1 or y==0 or y == num_nodes-1)
+                grid.back()->fixed << 0, 0, 0;
         }
     }
 
@@ -77,8 +72,6 @@ int main(int argc, char **argv) {
                     paraFEM::NodeVec{grid[pos2], grid[pos1], grid[pos3]}, mat);
             m1->setConstPressure(pressure);
             m2->setConstPressure(pressure);
-            m1->coordSys = paraFEM::CoordSys(m1->coordSys.n, paraFEM::Vector3(1, 0, 0));
-            m2->coordSys = paraFEM::CoordSys(m2->coordSys.n, paraFEM::Vector3(1, 0, 0));
             elements.push_back(m1);
             elements.push_back(m2);
         }

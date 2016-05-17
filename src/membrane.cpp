@@ -29,7 +29,7 @@ Membrane3::Membrane3(std::vector<NodePtr> points, std::shared_ptr<MembraneMateri
     {
         pos_mat.row(row_count) = coordSys.toLocal(node->position - center);
         vel_mat.row(row_count) = coordSys.toLocal(node->velocity);
-        node->massInfluence += material->rho * area;
+        node->massInfluence += material->rho * area / nodes.size();
         row_count ++;
     }
     stress.setZero();
@@ -95,17 +95,19 @@ void Membrane3::makeStep(double h)
     // 5: integrate stress_rate (time, area)
     stress += h * stress_rate;
     Vector3 local_force =  stress * area;
+    Vector3 structural_damping = material->d_structural * stress_rate * area;
     
     // 6: nodal forces with virtual power
     // T.T * B.T * stress
     Vector2 local_node_force;
+    
     for (int i = 0; i < nodes.size(); i++)
     {
         local_node_force.setZero();
-        local_node_force.x() += B(0, i) * (local_force(0) + material->d_structural * strain_rate(0))
-                             +  B(1, i) * (local_force(2) + material->d_structural * strain_rate(2));
-        local_node_force.y() += B(1, i) * (local_force(1) + material->d_structural * strain_rate(1))
-                             +  B(0, i) * (local_force(2) + material->d_structural * strain_rate(2));
+        local_node_force.x() += B(0, i) * (local_force(0) + structural_damping(0))
+                             +  B(1, i) * (local_force(2) + structural_damping(2));
+        local_node_force.y() += B(1, i) * (local_force(1) + structural_damping(1))
+                             +  B(0, i) * (local_force(2) + structural_damping(2));
         nodes[i]->internalForce += coordSys.toGlobal(local_node_force);
     }
 }
@@ -242,6 +244,7 @@ void Membrane4::makeStep(double h)
         // 5: integrate sigma
         int_point.stress += h * stress_rate;
         Vector3 local_force = int_point.stress * area;
+        Vector3 structural_damping = material->d_structural * stress_rate * area;
 
         // 6: nodal forces due to internal work
         Vector2 local_node_force;
@@ -249,11 +252,11 @@ void Membrane4::makeStep(double h)
         for (int i = 0; i < nodes.size(); i++)
             {
                 local_node_force.setZero();
-                local_node_force.x() += B(0, i) * (local_force(0) + material->d_structural * strain_rate(0))
-                                    +  B(1, i) * (local_force(2) + material->d_structural * strain_rate(2));
-                local_node_force.y() += B(1, i) * (local_force(1) + material->d_structural * strain_rate(1))
-                                        +  B(0, i) * (local_force(2) + material->d_structural * strain_rate(2));
-                nodes[i]->internalForce += coordSys.toGlobal(local_node_force);
+                local_node_force.x() += B(0, i) * (local_force(0) + structural_damping(0))
+                                     +  B(1, i) * (local_force(2) + structural_damping(2));
+                local_node_force.y() += B(1, i) * (local_force(1) + structural_damping(1))
+                                     +  B(0, i) * (local_force(2) + structural_damping(2));
+                nodes[i]->internalForce += int_point.weight * coordSys.toGlobal(local_node_force);
             }
 
     }

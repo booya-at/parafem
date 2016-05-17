@@ -90,7 +90,7 @@ int VtkWriter::writeCase(paraFEM::FemCasePtr c, double coordSysSize)
         line->GetPointIds()->SetId(1, numbers[1] + counter);
         lines->InsertNextCell(line);
         paraFEM::Vector3 stress = element->getStress();
-        cellData->InsertNextTuple3(stress.x(), stress.y(), stress.z() * stress.z());  //scalar
+        cellData->InsertNextTuple3(stress.x(), stress.y(), stress.z());  //scalar
     }
 
     for (auto element: membrane_elements)

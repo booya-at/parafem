@@ -11,26 +11,27 @@ int main(int argc, char **argv) {
 
     ///////////////----INPUT----////////////////
     // MESH
-    int num_nodes = 20; // num_nodes x num_nodes
+    int num_nodes = 40; // num_nodes x num_nodes
 
     // SIM
-    double stepsize = 0.0005;
-    int interations = 60000;
-    int num_export = 200;
+    double stepsize = 0.005;
+    int interations = 500;
+    int num_export = 100;
     
     // MATERIAL
     double E = 1000;
     double nue = 0.3;
-    double structural_damping = 1;
-    double velocity_damping = 0.001;
+    double structural_damping = 1. / E;
+    double velocity_damping = 0.5;
+    double rho = 0.1;
     
     // FORCE
-    double pressure = 1;
+    double pressure = 50;
     ////////////////////////////////////////////
 
 
     //INTEGRATION
-    bool reduced_integration = 0;
+    bool reduced_integration = 1;
 
 
     // DECLARATION
@@ -45,7 +46,7 @@ int main(int argc, char **argv) {
 
     paraFEM::MembraneMaterialPtr mat (new paraFEM::MembraneMaterial(E, nue));
     mat->d_structural = structural_damping;
-    mat->rho = 0.1;
+    mat->rho = rho;
 
     // NODES
     for (int x=0; x < num_nodes; x++)
@@ -53,13 +54,8 @@ int main(int argc, char **argv) {
         for (int y=0; y < num_nodes; y++)
         {
             grid.push_back(std::make_shared<paraFEM::Node>(x, y, 0));
-            if (x==0) // or y==0 or y == num_nodes-1)
+            if (x==0 or x==num_nodes-1 or y==0 or y == num_nodes-1)
                 grid.back()->fixed << 0, 0, 0;
-            if ( x == num_nodes-1)
-            {
-                grid.back()->fixed << 1, 0, 0;
-                grid.back()->externalForce << 2, 0, 0;
-            }
         }
     }
 
@@ -86,10 +82,9 @@ int main(int argc, char **argv) {
     c1->d_velocity = velocity_damping;
 
     // WRITER
-    VtkWriter writer = VtkWriter("/tmp/paraFEM/membrane4_2/output");
+    VtkWriter writer = VtkWriter("/tmp/paraFEM/membrane4_2/int0output");
 
-    // LOOP
-    cout << m1->integration_points.size() << endl;
+    // LOOP;
     for (int i=0; i<interations; i++)
     {
         c1->makeStep(stepsize);

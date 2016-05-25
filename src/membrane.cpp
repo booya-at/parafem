@@ -110,6 +110,9 @@ void Membrane3::makeStep(double h)
                              +  B(0, i) * (local_force(2) + structural_damping(2));
         nodes[i]->internalForce += coordSys.toGlobal(local_node_force);
     }
+    for (auto node: nodes)
+        node->internalForce -= pressure / nodes.size() * this->coordSys.n;
+    
 }
 
 Vector3 Membrane3::getStress()
@@ -260,6 +263,9 @@ void Membrane4::makeStep(double h)
             }
 
     }
+    
+    for (auto node: nodes)
+        node->internalForce -= pressure / nodes.size() * this->coordSys.n;
     // 7: hourglasscontrol
     if (integration_points.size() == 1)
     {

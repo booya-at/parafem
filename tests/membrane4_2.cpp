@@ -14,15 +14,15 @@ int main(int argc, char **argv) {
     int num_nodes = 40; // num_nodes x num_nodes
 
     // SIM
-    double stepsize = 0.005;
-    int interations = 500;
+    double stepsize = 0.001;
+    int interations = 5000;
     int num_export = 100;
     
     // MATERIAL
     double E = 1000;
-    double nue = 0.3;
+    double nue = 0.4;
     double structural_damping = 1. / E;
-    double velocity_damping = 0.5;
+    double velocity_damping = 0.2;
     double rho = 0.1;
     
     // FORCE
@@ -55,7 +55,7 @@ int main(int argc, char **argv) {
         {
             grid.push_back(std::make_shared<paraFEM::Node>(x, y, 0));
             if (x==0 or x==num_nodes-1 or y==0 or y == num_nodes-1)
-                grid.back()->fixed << 0, 0, 0;
+                grid.back()->fixed << 1, 1, 0;
         }
     }
 
@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
                     paraFEM::NodeVec{grid[pos1], grid[pos4], grid[pos3], grid[pos2]},
                     mat, reduced_integration);
             m1->coordSys = paraFEM::CoordSys(m1->coordSys.n, paraFEM::Vector3(1, 0, 0));
-            m1->setConstPressure(pressure);
+            m1->pressure = pressure;
             elements.push_back(m1);
         }
     }

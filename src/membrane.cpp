@@ -111,7 +111,10 @@ void Membrane3::makeStep(double h)
         nodes[i]->internalForce += coordSys.toGlobal(local_node_force);
     }
     for (auto node: nodes)
+    {
         node->internalForce -= pressure / nodes.size() * this->coordSys.n;
+        node->internalForce += node->velocity * material->d_velocity * area / nodes.size();
+    }
     
 }
 
@@ -265,7 +268,11 @@ void Membrane4::makeStep(double h)
     }
     
     for (auto node: nodes)
+    {
         node->internalForce -= pressure / nodes.size() * this->coordSys.n;
+        node->internalForce += node->velocity * material->d_velocity * area / nodes.size();
+    }
+        
     // 7: hourglasscontrol
     if (integration_points.size() == 1)
     {

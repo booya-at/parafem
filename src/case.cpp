@@ -36,7 +36,6 @@ void FemCase::makeStep(double h)
     for(int j = 0; j < node_cp.size(); j++)
     {
         auto node = node_cp[j];
-        node->internalForce += node->velocity * d_velocity;
         node->solveEquilibrium(h);
         node->internalForce.setZero();
     }

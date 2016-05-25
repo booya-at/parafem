@@ -5,6 +5,7 @@ The goal of this project is to have a working fem code supporting membrane and t
 ## tasks
 
  - a working c++ source
+ - compareison of elements
  - test framework
  - json inputs
  - python binding with pybind11

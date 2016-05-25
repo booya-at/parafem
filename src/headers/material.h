@@ -9,6 +9,7 @@ class Material: Base
 public:
     double rho = 1;
     double d_structural = 1;
+    double d_velocity = 1;
     double elasticity = 10000;
 };
 

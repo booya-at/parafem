@@ -20,8 +20,8 @@ public:
     std::set<NodePtr> nodes;
     ElementVec elements;
     void makeStep(double h);
-    
-    double d_velocity = 0;
+    /*
+    double d_velocity = 0;*/
 };
 
 typedef std::shared_ptr<FemCase> FemCasePtr;

@@ -11,12 +11,12 @@ int main(int argc, char **argv) {
 
     ///////////////----INPUT----////////////////
     // MESH
-    int num_nodes = 40; // num_nodes x num_nodes
+    int num_nodes = 50; // num_nodes x num_nodes
 
     // SIM
     double stepsize = 0.001;
     int interations = 5000;
-    int num_export = 100;
+    int num_export = 10;
     
     // MATERIAL
     double E = 1000;
@@ -47,6 +47,7 @@ int main(int argc, char **argv) {
     paraFEM::MembraneMaterialPtr mat (new paraFEM::MembraneMaterial(E, nue));
     mat->d_structural = structural_damping;
     mat->rho = rho;
+    mat->d_velocity = 0.5;
 
     // NODES
     for (int x=0; x < num_nodes; x++)
@@ -79,7 +80,6 @@ int main(int argc, char **argv) {
 
     // CASE
     paraFEM::FemCasePtr c1 (new paraFEM::FemCase(elements));
-    c1->d_velocity = velocity_damping;
 
     // WRITER
     VtkWriter writer = VtkWriter("/tmp/paraFEM/membrane4_2/int0output");

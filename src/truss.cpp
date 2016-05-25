@@ -36,6 +36,8 @@ void Truss::makeStep(double h)
     // internal force with virtual power
     nodes[1]->internalForce -= tangent * (stress + strain_rate * material->d_structural);
     nodes[0]->internalForce += tangent * (stress + strain_rate * material->d_structural);
+    for (auto node: nodes)
+        node->internalForce += node->velocity * material->d_velocity * new_length / nodes.size();
 }
 
 Vector3 Truss::getStress()

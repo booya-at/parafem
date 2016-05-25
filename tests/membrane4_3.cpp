@@ -45,11 +45,11 @@ int main(int argc, char **argv) {
   
     std::shared_ptr<paraFEM::MembraneMaterial> mat (new paraFEM::MembraneMaterial(E, nue));
     mat->d_structural = structural_damping;
+    mat->d_velocity = velocity_damping;
 
     paraFEM::Membrane4Ptr m1 (new paraFEM::Membrane4(paraFEM::NodeVec{n1, n2, n3, n4}, mat, reduced_integration));
     paraFEM::FemCasePtr c1 (new paraFEM::FemCase(paraFEM::ElementVec{m1}));
 
-    c1->d_velocity = velocity_damping;
     VtkWriter writer = VtkWriter("/tmp/paraFEM/membrane4_3/output");
 
     for (int i=0; i<interations; i++)

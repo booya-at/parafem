@@ -47,6 +47,7 @@ struct Element: Base
     virtual void makeStep(double h) = 0;  // compute the internal forces acting on the nodes.
     std::vector<int> getNr();
     virtual Vector3 getStress()=0;
+    void setFixed();
 };
 
 struct Truss: public Element

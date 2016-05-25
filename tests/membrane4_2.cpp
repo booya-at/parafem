@@ -16,17 +16,17 @@ int main(int argc, char **argv) {
     // SIM
     double stepsize = 0.001;
     int interations = 5000;
-    int num_export = 10;
+    int num_export = 50;
     
     // MATERIAL
     double E = 1000;
-    double nue = 0.4;
+    double nue = 0.1;
     double structural_damping = 1. / E;
     double velocity_damping = 0.2;
     double rho = 0.1;
     
     // FORCE
-    double pressure = 10;
+    double pressure = 2;
     ////////////////////////////////////////////
 
 
@@ -47,15 +47,15 @@ int main(int argc, char **argv) {
     paraFEM::MembraneMaterialPtr mat (new paraFEM::MembraneMaterial(E, nue));
     mat->d_structural = structural_damping;
     mat->rho = rho;
-    mat->d_velocity = 0.5;
+    mat->d_velocity = velocity_damping;
 
     // NODES
     for (int x=0; x < num_nodes; x++)
     {
-        for (int y=0; y < num_nodes; y++)
+        for (int y=0; y < num_nodes * 3; y++)
         {
             grid.push_back(std::make_shared<paraFEM::Node>(x, y, 0));
-            if (x==0 or x==num_nodes-1 or y==0 or y == num_nodes-1)
+            if (x==0 or x==num_nodes-1 or y==0 or y == num_nodes * 3 - 1)
                 grid.back()->fixed << 1, 1, 0;
         }
     }
@@ -63,11 +63,11 @@ int main(int argc, char **argv) {
     // ELEMENTS
     for (int ex=0; ex < (num_nodes -1); ex++)
     {
-        for (int ey=0; ey < num_nodes -1; ey++)
+        for (int ey=0; ey < num_nodes * 3 -1; ey++)
         {
-            pos1 = ex * num_nodes + ey;
+            pos1 = ex * num_nodes * 3 + ey;
             pos2 = pos1 + 1;
-            pos3 = pos2 + num_nodes;
+            pos3 = pos2 + num_nodes * 3;
             pos4 = pos3 -1;
             m1 = std::make_shared<paraFEM::Membrane4>(
                     paraFEM::NodeVec{grid[pos1], grid[pos4], grid[pos3], grid[pos2]},

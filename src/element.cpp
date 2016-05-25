@@ -79,6 +79,12 @@ std::vector< int > Element::getNr()
 }
 
 
+void Element::setFixed()
+{
+    for (auto node: nodes)
+        node->fixed << 0, 0, 0;
+}
+
 IntegrationPoint::IntegrationPoint(double eta_in, double zeta_in, double weight_in)
 {
     eta = eta_in;

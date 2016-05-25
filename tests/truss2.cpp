@@ -14,6 +14,7 @@ int main(int argc, char **argv) {
     paraFEM::TrussPtr truss;
     std::shared_ptr<paraFEM::TrussMaterial> mat (new paraFEM::TrussMaterial(5000));
     mat->d_structural = 10;
+    mat->d_velocity = 0.1;
     for (int i = 0; i < 100; i++)
     {
         nodes.push_back(std::make_shared<paraFEM::Node>(double(i), 0, 0));
@@ -28,7 +29,6 @@ int main(int argc, char **argv) {
     nodes[0]->fixed = paraFEM::Vector3(0, 0, 0);
     nodes.back()->fixed = paraFEM::Vector3(0, 0, 0);
     paraFEM::FemCasePtr c (new paraFEM::FemCase(elements));
-    c->d_velocity = 1;
 
     VtkWriter writer = VtkWriter("/tmp/paraFEM/truss2_");
     for (int i=0; i<2000; i++)

@@ -17,10 +17,10 @@ int main(int argc, char **argv) {
     n2->fixed = paraFEM::Vector3(0,1,0);
     n3->fixed = paraFEM::Vector3(0,1,0);
     std::shared_ptr<paraFEM::MembraneMaterial> mat (new paraFEM::MembraneMaterial(100, 0.3));
+    mat->d_velocity = 0.1;
     paraFEM::Membrane3Ptr m1 (new paraFEM::Membrane3(paraFEM::NodeVec{n4, n1, n3}, mat));
     paraFEM::Membrane3Ptr m2 (new paraFEM::Membrane3(paraFEM::NodeVec{n2, n3, n1}, mat));
     paraFEM::FemCasePtr c1 (new paraFEM::FemCase(paraFEM::ElementVec{m1, m2}));
-    c1->d_velocity = 0.1;
     VtkWriter writer = VtkWriter("/tmp/paraFEM/membrane3_1/output");
 
     for (int i=0; i<100; i++)

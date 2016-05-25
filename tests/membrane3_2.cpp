@@ -45,6 +45,7 @@ int main(int argc, char **argv) {
     paraFEM::MembraneMaterialPtr mat (new paraFEM::MembraneMaterial(E, nue));
     mat->d_structural = structural_damping;
     mat->rho = rho;
+    mat->d_velocity = velocity_damping;
 
     // NODES
     for (int x=0; x < num_nodes; x++)
@@ -79,7 +80,6 @@ int main(int argc, char **argv) {
 
     // CASE
     paraFEM::FemCasePtr c1 (new paraFEM::FemCase(elements));
-    c1->d_velocity = velocity_damping;
 
     // WRITER
     VtkWriter writer = VtkWriter("/tmp/paraFEM/membrane3_2/output");

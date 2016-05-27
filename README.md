@@ -11,7 +11,10 @@ The goal of this project is to have a working fem code supporting membrane and t
  - python binding with pybind11
  - make faster (fixed size arrays, ...)
 
- 
+## results
+
+![result](./images/pillow.png)
+
 ## python bindings:
 
 ```python
@@ -36,12 +39,12 @@ for node_nr in mesh.elements:
     element.groupTag = "groupa"
     element.tag = "10"
     elements.append(element)
-    
+
 for hinge_nodes in mesh.hinges:
     hinge = paraFEM.hinge(*hinge)
     elemnts.append(hinge)
 
-    
+
 case = paraFEM.case(elements)
 case.store(100)
 case.maxU(0.0001)

@@ -55,7 +55,7 @@ struct Truss: public Element
     Vector3 pressure;
     Vector3 tangent;
     double length;
-    Truss(std::vector<NodePtr>, std::shared_ptr<TrussMaterial>);
+    Truss(const std::vector<NodePtr>, std::shared_ptr<TrussMaterial>);
     virtual Vector3 getStress();
     double stress;           // at timestep n
     virtual void makeStep(double h);
@@ -76,7 +76,7 @@ struct Membrane: public Element
 
 struct Membrane3: public Membrane
 {
-    Membrane3(std::vector<NodePtr>, std::shared_ptr<MembraneMaterial>);
+    Membrane3(const std::vector<NodePtr>, std::shared_ptr<MembraneMaterial>);
     virtual void makeStep(double h);
     Vector3 stress;
     virtual Vector3 getStress();
@@ -87,7 +87,7 @@ struct Membrane3: public Membrane
 
 struct Membrane4: public  Membrane
 {
-    Membrane4(std::vector<NodePtr>, std::shared_ptr<MembraneMaterial>, bool reduced_integration=true);
+    Membrane4(const std::vector<NodePtr>, std::shared_ptr<MembraneMaterial>, bool reduced_integration=true);
     std::vector<IntegrationPoint> integration_points;  //eta, zeta, weight, stress
     virtual void makeStep(double h);
     
@@ -110,4 +110,5 @@ typedef std::shared_ptr<Membrane3> Membrane3Ptr;
 typedef std::shared_ptr<Membrane4> Membrane4Ptr;
 typedef std::vector<std::shared_ptr<Element>> ElementVec;
 }
+
 #endif

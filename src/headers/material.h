@@ -1,3 +1,6 @@
+#ifndef MATERIAL_H
+#define MATERIAL_H
+
 #include "base.h"
 #include "eigen3/Eigen/Core"
 #include <memory>
@@ -33,3 +36,6 @@ typedef std::shared_ptr<MembraneMaterial> MembraneMaterialPtr;
 typedef std::shared_ptr<TrussMaterial> TrussMaterialPtr;
 
 }
+
+
+#endif

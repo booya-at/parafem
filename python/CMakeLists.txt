@@ -13,3 +13,5 @@ include_directories( ${PYTHON_INCLUDE_DIRS})    # python.h
 
 PYTHON_ADD_MODULE(paraFEM_py SHARED paraFEM_py.cpp)
 target_link_libraries(paraFEM_py paraFEM)
+
+configure_file(test.py test.py COPYONLY)

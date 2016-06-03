@@ -9,6 +9,10 @@
 #include "case.h"
 #include "material.h"
 
+
+PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
+
+
 namespace py = pybind11;
 
 void init_paraFEM(py::module &m){
@@ -16,9 +20,11 @@ void init_paraFEM(py::module &m){
     py::class_<paraFEM::Node> (m, "Node")
         .def(py::init<double, double, double>());
     
-    py::class_<paraFEM::TrussMaterial>(m, "TrussMaterial");
+    py::class_<paraFEM::TrussMaterial>(m, "TrussMaterial")
+        .def(py::init<double>());
     
-    py::class_<paraFEM::MembraneMaterial>(m, "MembraneMaterial");
+    py::class_<paraFEM::MembraneMaterial>(m, "MembraneMaterial")
+        .def(py::init<double, double>());
         
     py::class_<paraFEM::Truss> (m, "Truss")
         .def(py::init<std::vector<paraFEM::NodePtr>, paraFEM::TrussMaterialPtr>());

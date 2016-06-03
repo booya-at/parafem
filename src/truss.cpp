@@ -8,7 +8,7 @@ Truss::Truss(std::vector<NodePtr> points, std::shared_ptr<TrussMaterial> mat)
 {
     nodes = points;
     stress = 0;
-    tangent = (nodes[1]->position - nodes[1]->position);
+    tangent = (nodes[1]->position - nodes[0]->position);
     length = tangent.norm();
     tangent.normalize();
     material = mat;

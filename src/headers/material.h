@@ -10,10 +10,10 @@ namespace paraFEM{
 class Material: Base
 {
 public:
-    double rho = 1;
-    double d_structural = 1;
-    double d_velocity = 1;
-    double elasticity = 10000;
+    double rho = 1.;
+    double d_structural = 1.;
+    double d_velocity = 1.;
+    double elasticity = 10000.;
 };
 
 
@@ -32,6 +32,7 @@ public:
     Eigen::Matrix3d C;
 };
 
+typedef std::shared_ptr<Material> MaterialPtr;
 typedef std::shared_ptr<MembraneMaterial> MembraneMaterialPtr;
 typedef std::shared_ptr<TrussMaterial> TrussMaterialPtr;
 

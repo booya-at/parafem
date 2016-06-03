@@ -24,8 +24,10 @@ public:
     
     Vector3 externalForce;
     Vector3 internalForce;
+
+    void add_external_force(Vector3 force);
     
-    double massInfluence;
+    double massInfluence = 1;
 
     void solveEquilibrium(double h);
     Vector3 fixed;

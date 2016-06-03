@@ -108,7 +108,8 @@ typedef std::shared_ptr<Truss> TrussPtr;
 typedef std::shared_ptr<Membrane> MembranePtr;
 typedef std::shared_ptr<Membrane3> Membrane3Ptr;
 typedef std::shared_ptr<Membrane4> Membrane4Ptr;
-typedef std::vector<std::shared_ptr<Element>> ElementVec;
+typedef std::shared_ptr<Element> ElementPtr;
+typedef std::vector<ElementPtr> ElementVec;
 }
 
 #endif

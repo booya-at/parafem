@@ -5,7 +5,7 @@
 
 namespace paraFEM {
 
-FemCase::FemCase(ElementVec elements)
+FemCase::FemCase(std::vector<ElementPtr> elements)
 {
     for (auto element: elements)
     {
@@ -21,7 +21,7 @@ FemCase::FemCase(ElementVec elements)
 void FemCase::makeStep(double h)
 {
     time += h;
-    std::vector<NodePtr> node_cp(nodes.begin(), nodes.end());
+    auto node_cp = this->get_nodes();
 
 // for with iterator
 #pragma omp parallel for
@@ -40,6 +40,11 @@ void FemCase::makeStep(double h)
         node->internalForce.setZero();
     }
     
+}
+
+NodeVec FemCase::get_nodes()
+{
+    return NodeVec (nodes.begin(), nodes.end());
 }
 
 

@@ -14,3 +14,5 @@ set(CPP_FILES  ${CMAKE_SOURCE_DIR}/src/case.cpp
                ${CMAKE_SOURCE_DIR}/src/material.cpp)
 
 add_library(paraFEM SHARED ${CPP_FILES} ${HEADER_FILES})
+
+install(TARGETS paraFEM DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)

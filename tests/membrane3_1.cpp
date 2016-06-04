@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     paraFEM::Membrane3Ptr m1 (new paraFEM::Membrane3(paraFEM::NodeVec{n4, n1, n3}, mat));
     paraFEM::Membrane3Ptr m2 (new paraFEM::Membrane3(paraFEM::NodeVec{n2, n3, n1}, mat));
     paraFEM::FemCasePtr c1 (new paraFEM::FemCase(paraFEM::ElementVec{m1, m2}));
-    VtkWriter writer = VtkWriter("/tmp/paraFEM/membrane3_1/output");
+    paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/paraFEM/membrane3_1/output");
 
     for (int i=0; i<100; i++)
     {

@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
     paraFEM::FemCasePtr c1 (new paraFEM::FemCase(elements));
 
     // WRITER
-    VtkWriter writer = VtkWriter("/tmp/paraFEM/membrane3_2/output");
+    paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/paraFEM/membrane3_2/output");
 
     // LOOP
     for (int i=0; i<interations; i++)

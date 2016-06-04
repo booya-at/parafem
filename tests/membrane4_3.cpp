@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
     paraFEM::Membrane4Ptr m1 (new paraFEM::Membrane4(paraFEM::NodeVec{n1, n2, n3, n4}, mat, reduced_integration));
     paraFEM::FemCasePtr c1 (new paraFEM::FemCase(paraFEM::ElementVec{m1}));
 
-    VtkWriter writer = VtkWriter("/tmp/paraFEM/membrane4_3/output");
+    paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/paraFEM/membrane4_3/output");
 
     for (int i=0; i<interations; i++)
     {

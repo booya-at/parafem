@@ -15,4 +15,4 @@ set(CPP_FILES  ${CMAKE_SOURCE_DIR}/src/case.cpp
 
 add_library(paraFEM SHARED ${CPP_FILES} ${HEADER_FILES})
 
-install(TARGETS paraFEM DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(TARGETS paraFEM DESTINATION lib)

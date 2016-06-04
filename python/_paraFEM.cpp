@@ -21,6 +21,7 @@ void init_paraFEM(py::module &m){
     py::module::import("paraEigen");
 
     py::class_<paraFEM::VtkWriter, std::shared_ptr<paraFEM::VtkWriter>>(m, "vtkWriter")
+        .def(py::init<const char*>())
         .def("writeCase", &paraFEM::VtkWriter::writeCase);
 
     py::class_<paraFEM::Node, paraFEM::NodePtr> (m, "Node")

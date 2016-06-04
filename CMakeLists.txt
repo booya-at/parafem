@@ -4,7 +4,7 @@ ADD_DEFINITIONS(-std=c++11)
 PROJECT(parafem)
 
 # OPTIONS
-OPTION(BUILD_TESTS "test require vtk" OFF)
+OPTION(BUILD_TESTS "test require vtk" ON)
 OPTION(BUILD_PYTHON_BINDINGS "create python bindings" ON)
 OPTION(BUILD_JSON "json in out" ON)
 
@@ -17,9 +17,6 @@ IF(OPENMP_FOUND)
 ENDIF()
 
 
-ADD_SUBDIRECTORY("src/")
-ADD_SUBDIRECTORY("vtkWriter/")
-
 IF (BUILD_TESTS)
 	ADD_SUBDIRECTORY("tests/")
 ENDIF(BUILD_TESTS)
@@ -27,3 +24,8 @@ ENDIF(BUILD_TESTS)
 IF (BUILD_PYTHON_BINDINGS)
 	ADD_SUBDIRECTORY("python/")
 ENDIF(BUILD_PYTHON_BINDINGS)
+
+# !!!! the order how the subdirectories are added does matter
+# !!!! remember for other project
+ADD_SUBDIRECTORY("vtkWriter/")
+ADD_SUBDIRECTORY("src/")

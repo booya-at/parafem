@@ -7,4 +7,4 @@ include(${VTK_USE_FILE})
 add_library(vtkWriter SHARED vtkWriter.cpp)
 target_link_libraries(vtkWriter ${VTK_LIBRARIES} paraFEM)
 
-install(TARGETS vtkWriter DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(TARGETS vtkWriter DESTINATION lib)

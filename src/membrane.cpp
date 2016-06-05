@@ -7,7 +7,9 @@ namespace paraFEM {
 void Membrane::setConstPressure(double p)
 {
     for (auto node: nodes)
+    {
         node->externalForce += coordSys.n * area * p / nodes.size();
+    }
 }
     
     
@@ -23,7 +25,12 @@ Membrane3::Membrane3(std::vector<NodePtr> points, std::shared_ptr<MembraneMateri
     Vector3 n = (nodes[1]->position - nodes[0]->position).cross(
                          nodes[2]->position - nodes[1]->position);
     area = n.norm() / 2;
-    assert(area > 0.);
+    if (area == 0)
+    {
+        std::cout << "warning area 0" << std::endl;
+        is_valid = false;
+        return;
+    }
     coordSys = CoordSys(n / area / 2., nodes[1]->position - nodes[0]->position);
     int row_count = 0;
     for (auto node: nodes)
@@ -38,6 +45,9 @@ Membrane3::Membrane3(std::vector<NodePtr> points, std::shared_ptr<MembraneMateri
 
 void Membrane3::makeStep(double h)
 {
+    if (not is_valid)
+        return;
+
     // 0: properties
     center.setZero();
     
@@ -138,7 +148,11 @@ Membrane4::Membrane4(std::vector<NodePtr> points,
     Vector3 n = (nodes[2]->position - nodes[0]->position).cross(
                  nodes[3]->position - nodes[1]->position);
     area = n.norm() / 2;
-    assert(area > 0.);
+    if (area == 0)
+    {
+        is_valid = false;
+        return;
+    }
     coordSys = CoordSys(n / area / 2, nodes[1]->position - nodes[0]->position);
     int row_count = 0;
     for (auto node: nodes)
@@ -187,7 +201,8 @@ void Membrane4::initHG()
     
 void Membrane4::makeStep(double h)
 {    // 0: properties
-    
+    if (not is_valid)
+        return;
     center.setZero();
     
     //      find new center

@@ -30,7 +30,7 @@ void init_paraFEM(py::module &m){
         .def_readonly("velocity", &paraFEM::Node::velocity)
         .def_readonly("acceleration", &paraFEM::Node::acceleration)
         .def_readwrite("fixed", &paraFEM::Node::fixed)
-        .def_readonly("massInfluence", &paraFEM::Node::massInfluence)
+        .def_readwrite("massInfluence", &paraFEM::Node::massInfluence)
         .def("add_external_force", &paraFEM::Node::add_external_force);
 
     py::class_<paraFEM::Material>(m, "Material")

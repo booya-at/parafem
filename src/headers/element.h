@@ -48,6 +48,7 @@ struct Element: Base
     std::vector<int> getNr();
     virtual Vector3 getStress()=0;
     void setFixed();
+    bool is_valid = true;
 };
 
 struct Truss: public Element

@@ -16,7 +16,7 @@ Node::Node(double x, double y, double z)
 }
 
 void Node::solveEquilibrium(double h)
-{   
+{
     acceleration = 1. / massInfluence * (externalForce - internalForce);
     velocity += h * (acceleration.cwiseProduct(fixed));   // at time t + 0.5h
     position += velocity * h;       // at time t + 1

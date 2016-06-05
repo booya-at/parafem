@@ -58,22 +58,25 @@ int VtkWriter::writeCase(paraFEM::FemCasePtr c, double coordSysSize)
         paraFEM::Vector3 z;      // counter +3
         for (auto element: membrane_elements)
         {
-            center = element->center;
-            x = center + element->coordSys.t1 * coordSysSize;
-            y = center + element->coordSys.t2 * coordSysSize;
-            z = center + element->coordSys.n * coordSysSize;
-            for (auto pos: vector<paraFEM::Vector3>{center, x, y, z})
-                points->InsertNextPoint(pos.x(), pos.y(), pos.z());
-            for (int i = 0; i < 3; i++)
+            if (element->is_valid)
             {
-                vtkSmartPointer<vtkLine> line = vtkSmartPointer<vtkLine>::New();
-                line->GetPointIds()->SetId(0, counter);
-                line->GetPointIds()->SetId(1, counter + i + 1);
-                lines->InsertNextCell(line);
-                
-                cellData->InsertNextTuple3(0, 0, 0);
+                center = element->center;
+                x = center + element->coordSys.t1 * coordSysSize;
+                y = center + element->coordSys.t2 * coordSysSize;
+                z = center + element->coordSys.n * coordSysSize;
+                for (auto pos: vector<paraFEM::Vector3>{center, x, y, z})
+                    points->InsertNextPoint(pos.x(), pos.y(), pos.z());
+                for (int i = 0; i < 3; i++)
+                {
+                    vtkSmartPointer<vtkLine> line = vtkSmartPointer<vtkLine>::New();
+                    line->GetPointIds()->SetId(0, counter);
+                    line->GetPointIds()->SetId(1, counter + i + 1);
+                    lines->InsertNextCell(line);
+                    
+                    cellData->InsertNextTuple3(0, 0, 0);
+                }
+                counter += 4;
             }
-            counter += 4;
         }
     }
     
@@ -86,25 +89,31 @@ int VtkWriter::writeCase(paraFEM::FemCasePtr c, double coordSysSize)
 
     for (auto element: truss_elements)
     {
-        vector<int> numbers = element->getNr();
-        vtkSmartPointer<vtkLine> line = vtkSmartPointer<vtkLine>::New();
-        line->GetPointIds()->SetId(0, numbers[0] + counter);
-        line->GetPointIds()->SetId(1, numbers[1] + counter);
-        lines->InsertNextCell(line);
-        paraFEM::Vector3 stress = element->getStress();
-        cellData->InsertNextTuple3(stress.x(), stress.y(), stress.z());  //scalar
+        if (element->is_valid)
+        {
+            vector<int> numbers = element->getNr();
+            vtkSmartPointer<vtkLine> line = vtkSmartPointer<vtkLine>::New();
+            line->GetPointIds()->SetId(0, numbers[0] + counter);
+            line->GetPointIds()->SetId(1, numbers[1] + counter);
+            lines->InsertNextCell(line);
+            paraFEM::Vector3 stress = element->getStress();
+            cellData->InsertNextTuple3(stress.x(), stress.y(), stress.z());  //scalar
+        }
     }
 
     for (auto element: membrane_elements)
     {
-        vector<int> numbers = element->getNr();
-        vtkSmartPointer<vtkPolygon> polygon = vtkSmartPointer<vtkPolygon>::New();
-        for (int nr: numbers) {
-            polygon->GetPointIds()->InsertNextId(nr + counter);
+        if (element->is_valid)
+        {
+            vector<int> numbers = element->getNr();
+            vtkSmartPointer<vtkPolygon> polygon = vtkSmartPointer<vtkPolygon>::New();
+            for (int nr: numbers) {
+                polygon->GetPointIds()->InsertNextId(nr + counter);
+            }
+            polygons->InsertNextCell(polygon);
+            paraFEM::Vector3 stress = element->getStress();
+            cellData->InsertNextTuple3(stress.x(), stress.y(), stress.z());
         }
-        polygons->InsertNextCell(polygon);
-        paraFEM::Vector3 stress = element->getStress();
-        cellData->InsertNextTuple3(stress.x(), stress.y(), stress.z());
     }
 
     polydata->SetPoints(points);

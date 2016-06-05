@@ -37,6 +37,7 @@ void FemCase::makeStep(double h)
     {
         auto node = node_cp[j];
         node->solveEquilibrium(h);
+        // std::cout << node->acceleration << std::endl;
         node->internalForce.setZero();
     }
     

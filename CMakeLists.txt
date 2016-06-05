@@ -16,6 +16,8 @@ IF(OPENMP_FOUND)
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${OpenMP_C_FLAGS}")
 ENDIF()
 
+ADD_SUBDIRECTORY("vtkWriter/")
+ADD_SUBDIRECTORY("src/")
 
 IF (BUILD_TESTS)
 	ADD_SUBDIRECTORY("tests/")
@@ -24,8 +26,3 @@ ENDIF(BUILD_TESTS)
 IF (BUILD_PYTHON_BINDINGS)
 	ADD_SUBDIRECTORY("python/")
 ENDIF(BUILD_PYTHON_BINDINGS)
-
-# !!!! the order how the subdirectories are added does matter
-# !!!! remember for other project
-ADD_SUBDIRECTORY("vtkWriter/")
-ADD_SUBDIRECTORY("src/")

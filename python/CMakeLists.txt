@@ -15,7 +15,10 @@ INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/vtkWriter/headers)
 add_library(_paraFEM SHARED _paraFEM.cpp)
 target_link_libraries(_paraFEM paraFEM vtkWriter)
 set_target_properties(_paraFEM PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/paraFEM)
+# !!!!!!!!!remember
+set_target_properties(_paraFEM PROPERTIES INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 set_target_properties(_paraFEM PROPERTIES PREFIX "")
+
 
 configure_file(test.py ${CMAKE_BINARY_DIR}/paraFEM/test.py COPYONLY)
 configure_file(__init__.py ${CMAKE_BINARY_DIR}/paraFEM/__init__.py COPYONLY)

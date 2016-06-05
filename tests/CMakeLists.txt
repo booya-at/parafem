@@ -1,5 +1,5 @@
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/headers)
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/vtkWriter/headers)
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/vtkWriter/headers)
 
 add_executable(truss1 truss1.cpp)
 target_link_libraries(truss1 paraFEM vtkWriter)

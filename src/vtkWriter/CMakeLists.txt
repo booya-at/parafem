@@ -1,5 +1,5 @@
 include_directories( ${CMAKE_SOURCE_DIR}/src/headers)
-include_directories( ${CMAKE_SOURCE_DIR}/vtkWriter/headers)
+include_directories( ${CMAKE_SOURCE_DIR}/src/vtkWriter/headers)
 
 find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})

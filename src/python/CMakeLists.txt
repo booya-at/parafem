@@ -10,7 +10,7 @@ SET(PYTHON_INSTALL_DIR ${python_libs}/paraFEM)
 
 INCLUDE_DIRECTORIES( ${PYTHON_INCLUDE_DIRS})    # python.h, pybind11
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/headers)
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/vtkWriter/headers)
+INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/vtkWriter/headers)
 
 add_library(_paraFEM SHARED _paraFEM.cpp)
 target_link_libraries(_paraFEM paraFEM vtkWriter)

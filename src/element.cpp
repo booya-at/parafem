@@ -9,6 +9,7 @@ CoordSys::CoordSys(Vector3 n_vec)
     if (n == t1)
         t1 = Vector3(0, 1, 0);
     t2 = n.cross(t1);
+    assert(t2.norm() > 0.);
     t1 = t2.cross(n);
     n.normalize();
     t1.normalize();
@@ -21,6 +22,7 @@ CoordSys::CoordSys(Vector3 n_vec, Vector3 t1_vec)
 {
     n = n_vec;
     t2 = n.cross(t1_vec);
+    assert(t2.norm() > 0.);
     t1 = t2.cross(n);
     n.normalize();
     t1.normalize();
@@ -33,6 +35,7 @@ void CoordSys::update(Vector3 n_vec)
 {
     n = n_vec;
     t2 = n.cross(t1);
+    assert(t2.norm() > 0.);
     t1 = t2.cross(n);
     n.normalize();
     t1.normalize();

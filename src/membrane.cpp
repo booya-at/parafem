@@ -28,6 +28,12 @@ Membrane3::Membrane3(std::vector<NodePtr> points, std::shared_ptr<MembraneMateri
     if (area == 0)
     {
         std::cout << "warning area 0" << std::endl;
+        for (auto node: nodes)
+        {
+            std::cout << node->position << std::endl;
+        }
+
+
         is_valid = false;
         return;
     }

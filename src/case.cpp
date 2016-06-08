@@ -18,7 +18,7 @@ FemCase::FemCase(std::vector<ElementPtr> elements)
         node->nr = count ++;
 }
 
-void FemCase::makeStep(double h)
+void FemCase::makeStep(double h, double externalFactor)
 {
     time += h;
     auto node_cp = this->get_nodes();
@@ -36,8 +36,7 @@ void FemCase::makeStep(double h)
     for(int j = 0; j < node_cp.size(); j++)
     {
         auto node = node_cp[j];
-        node->solveEquilibrium(h);
-        // std::cout << node->acceleration << std::endl;
+        node->solveEquilibrium(h, externalFactor);
         node->internalForce.setZero();
     }
     

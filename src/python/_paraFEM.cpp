@@ -62,7 +62,8 @@ void init_paraFEM(py::module &m){
 
     py::class_<paraFEM::FemCase, paraFEM::FemCasePtr> (m, "Case")
         .def(py::init<std::vector<paraFEM::ElementPtr>>())
-        .def("makeStep", &paraFEM::FemCase::makeStep);
+        .def("makeStep", &paraFEM::FemCase::makeStep, "make one explicit step",
+            py::arg("externalFactor") = 1);
 }
 
 

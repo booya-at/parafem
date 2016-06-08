@@ -29,7 +29,7 @@ public:
     
     double massInfluence = 1;
 
-    void solveEquilibrium(double h);
+    void solveEquilibrium(double h, double externalFactor=1);
     Vector3 fixed;
     
     int nr;

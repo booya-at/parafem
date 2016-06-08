@@ -21,7 +21,7 @@ public:
     FemCase(std::vector<ElementPtr>);
     std::set<NodePtr> nodes;
     ElementVec elements;
-    void makeStep(double h);
+    void makeStep(double h, double externalFactor=1);
 
     NodeVec get_nodes();
 

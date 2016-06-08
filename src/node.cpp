@@ -15,9 +15,9 @@ Node::Node(double x, double y, double z)
     internalForce.setZero();
 }
 
-void Node::solveEquilibrium(double h)
+void Node::solveEquilibrium(double h, double externalFactor)
 {
-    acceleration = 1. / massInfluence * (externalForce - internalForce);
+    acceleration = 1. / massInfluence * (externalForce * externalFactor - internalForce);
     velocity += h * (acceleration.cwiseProduct(fixed));   // at time t + 0.5h
     position += velocity * h;       // at time t + 1
 }

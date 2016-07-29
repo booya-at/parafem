@@ -13,9 +13,9 @@ The goal of this project is to have a working fem code supporting membrane and t
 
 ## results
 
-![result](./images/pillow.png)   
+<img src="./images/pillow.png" alt="result" style="width: 500;"/>
 
-![result](./images/glider.png)
+<img src="./images/glider.png" alt="result" style="width: 500;"/>
 
 ## python bindings:
 

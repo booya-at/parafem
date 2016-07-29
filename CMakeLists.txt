@@ -3,6 +3,9 @@ ADD_DEFINITIONS(-std=c++11)
 
 PROJECT(parafem)
 
+
+set(CMAKE_CXX_FLAGS "-O4")
+
 # OPTIONS
 OPTION(BUILD_TESTS "test require vtk" ON)
 OPTION(BUILD_PYTHON_BINDINGS "create python bindings" ON)

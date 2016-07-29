@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
 
     for (int i=0; i<interations; i++)
     {
-        c1->makeStep(stepsize);
+        c1->explicitStep(stepsize);
         if (i % int(interations / num_export) == 0)
             writer.writeCase(c1, 0.3);
     }

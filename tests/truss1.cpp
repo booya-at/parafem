@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/mytest/atest");
     for (int i=0; i<1000; i++)
     {
-        c1->makeStep(0.01);
+        c1->explicitStep(0.01);
         if (i % 10 == 0)
             writer.writeCase(c1);
         

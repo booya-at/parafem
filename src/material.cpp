@@ -2,8 +2,14 @@
 
 
 namespace paraFEM {
-    
-    
+
+
+double TrussMaterial::waveSpeed()
+{
+	return pow(this->elasticity / this->rho, 0.5);
+}
+
+
 TrussMaterial::TrussMaterial(double elasticity)
 {
     this->elasticity = elasticity;
@@ -20,5 +26,9 @@ MembraneMaterial::MembraneMaterial(double elasticity, double nue)
 }
 
 
+double MembraneMaterial::waveSpeed()
+{
+	return pow(this->elasticity / this->rho / (1 - this->nue), 0.5);
+}
 
 }

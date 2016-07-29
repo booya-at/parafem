@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/paraFEM/truss2_");
     for (int i=0; i<2000; i++)
     {
-        c->makeStep(0.01);
+        c->explicitStep(0.01);
         if (i % 20 == 0)
             writer.writeCase(c);
         

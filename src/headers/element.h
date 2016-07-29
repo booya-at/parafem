@@ -30,6 +30,7 @@ struct CoordSys: Base
     void update(Vector3);
     Vector2 toLocal(Vector3);
     Vector3 toGlobal(Vector2);
+    
 };
 
 struct IntegrationPoint: Base
@@ -44,11 +45,14 @@ struct IntegrationPoint: Base
 struct Element: Base
 {
     std::vector<NodePtr> nodes;
-    virtual void makeStep(double h) = 0;  // compute the internal forces acting on the nodes.
+    virtual void explicitStep(double h) = 0;  // compute the internal forces acting on the nodes.
     std::vector<int> getNr();
     virtual Vector3 getStress()=0;
     void setFixed();
     bool is_valid = true;
+    double dViscous;
+    double characteristicLength;
+    virtual MaterialPtr getMaterial() = 0;
 };
 
 struct Truss: public Element
@@ -59,10 +63,19 @@ struct Truss: public Element
     Truss(const std::vector<NodePtr>, std::shared_ptr<TrussMaterial>);
     virtual Vector3 getStress();
     double stress;           // at timestep n
-    virtual void makeStep(double h);
+    virtual void explicitStep(double h);
     std::shared_ptr<TrussMaterial> material;
     void addNodalPressure(Vector3);
+    MaterialPtr getMaterial();
 };
+
+struct LineJoint: public Element
+{
+    LineJoint(const std::vector<NodePtr>, std::shared_ptr<TrussMaterial>);
+    virtual void explicitStep(double h);
+    virtual Vector3 getStress();
+    std::shared_ptr<TrussMaterial> material;
+};  
 
 struct Membrane: public Element
 {
@@ -73,12 +86,13 @@ struct Membrane: public Element
     void setConstPressure(double);
     
     std::shared_ptr<MembraneMaterial> material;
+    MaterialPtr getMaterial();
 };
 
 struct Membrane3: public Membrane
 {
     Membrane3(const std::vector<NodePtr>, std::shared_ptr<MembraneMaterial>);
-    virtual void makeStep(double h);
+    virtual void explicitStep(double h);
     Vector3 stress;
     virtual Vector3 getStress();
 
@@ -90,7 +104,7 @@ struct Membrane4: public  Membrane
 {
     Membrane4(const std::vector<NodePtr>, std::shared_ptr<MembraneMaterial>, bool reduced_integration=true);
     std::vector<IntegrationPoint> integration_points;  //eta, zeta, weight, stress
-    virtual void makeStep(double h);
+    virtual void explicitStep(double h);
     
     // hourglass control
     void initHG();

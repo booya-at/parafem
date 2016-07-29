@@ -7,18 +7,24 @@ namespace paraFEM {
 
 FemCase::FemCase(std::vector<ElementPtr> elements)
 {
+    double minTimeStep = 1;
+    double elTimeStep;
     for (auto element: elements)
     {
         for (auto node: element->nodes)
             this->nodes.insert(node);
         this->elements.push_back(element);
+        elTimeStep = element->characteristicLength / element->getMaterial()->waveSpeed();
+        if (elTimeStep < minTimeStep)
+            minTimeStep = elTimeStep;
     }
+    std::cout << "minTimeStep= " << minTimeStep << std::endl;
     int count = 0;
     for (auto node: nodes)
         node->nr = count ++;
 }
 
-void FemCase::makeStep(double h, double externalFactor)
+void FemCase::explicitStep(double h, double externalFactor)
 {
     time += h;
     auto node_cp = this->get_nodes();
@@ -28,7 +34,7 @@ void FemCase::makeStep(double h, double externalFactor)
     for(int i = 0; i < elements.size(); i++)
     {
         auto element = elements[i];
-        element->makeStep(h);  // computing the internal forces
+        element->explicitStep(h);  // computing the internal forces
     }
 
 // for with iterator
@@ -41,6 +47,29 @@ void FemCase::makeStep(double h, double externalFactor)
     }
     
 }
+
+// void FemCase::implicitStep(double h, double externalFactor)
+// {
+//     time += h;
+//     auto node_cp = this->get_nodes();
+//     Eigen::Triplet<double> Kt, Dt, Mt;
+//     Eigen::MatrixXd K, D, M;
+
+// #pragma omp parallel for
+//     for(int j = 0; j < elements.size(); j++)
+//     {
+//         auto element = elements[j];
+//         element->implicitStep(h, Kt, Dt, Mt);
+//     }
+//     // create global matrices from triplets
+
+//     // solve equilibrium equation
+
+//     // set new positions
+
+//     // integrate force
+    
+// }
 
 NodeVec FemCase::get_nodes()
 {

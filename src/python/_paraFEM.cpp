@@ -45,7 +45,8 @@ void init_paraFEM(py::module &m){
     py::class_<paraFEM::MembraneMaterial, paraFEM::MembraneMaterialPtr>(m, "MembraneMaterial", py::base<paraFEM::Material>())
         .def(py::init<double, double>());
 
-    py::class_<paraFEM::Element, paraFEM::ElementPtr>(m, "__Element");
+    py::class_<paraFEM::Element, paraFEM::ElementPtr>(m, "__Element")
+        .def("getStress", &paraFEM::Element::getStress);
 
     py::class_<paraFEM::Membrane, paraFEM::MembranePtr>(m, "__Membrane", py::base<paraFEM::Element>())
         .def_readwrite("pressure", &paraFEM::Membrane::pressure)
@@ -58,11 +59,12 @@ void init_paraFEM(py::module &m){
         .def(py::init<std::vector<paraFEM::NodePtr>, paraFEM::MembraneMaterialPtr>());
       
     py::class_<paraFEM::Membrane4, paraFEM::Membrane4Ptr> (m, "Membrane4", py::base<paraFEM::Membrane>())
-        .def(py::init<std::vector<paraFEM::NodePtr>, paraFEM::MembraneMaterialPtr>());
+        .def(py::init<std::vector<paraFEM::NodePtr>, paraFEM::MembraneMaterialPtr>())
+        .def(py::init<std::vector<paraFEM::NodePtr>, paraFEM::MembraneMaterialPtr, bool>());
 
     py::class_<paraFEM::FemCase, paraFEM::FemCasePtr> (m, "Case")
         .def(py::init<std::vector<paraFEM::ElementPtr>>())
-        .def("makeStep", &paraFEM::FemCase::makeStep, "make one explicit step",
+        .def("explicitStep", &paraFEM::FemCase::explicitStep, "make one explicit step",
             py::arg("h") = 0.0001, py::arg("externalFactor") = 1);
 }
 

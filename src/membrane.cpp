@@ -11,6 +11,12 @@ void Membrane::setConstPressure(double p)
         node->externalForce += coordSys.n * area * p / nodes.size();
     }
 }
+
+
+MaterialPtr Membrane::getMaterial()
+{
+    return std::dynamic_pointer_cast<Material>(this->material);
+}
     
     
     
@@ -47,9 +53,20 @@ Membrane3::Membrane3(std::vector<NodePtr> points, std::shared_ptr<MembraneMateri
         row_count ++;
     }
     stress.setZero();
+    double smallestSide = (nodes.back()->position - nodes[0]->position).norm();
+    for (int i=0; i < nodes.size() - 1; i++)
+    {
+        double sideLen = (nodes[i]->position - nodes[i+1]->position).norm();
+        if (sideLen < smallestSide)
+            smallestSide = sideLen;
+    }
+    dViscous = smallestSide * material->waveSpeed() * 
+               material->rho * material->d_minMode;
+    
+    characteristicLength = smallestSide;
 }
 
-void Membrane3::makeStep(double h)
+void Membrane3::explicitStep(double h)
 {
     if (not is_valid)
         return;
@@ -113,6 +130,8 @@ void Membrane3::makeStep(double h)
     stress += h * stress_rate;
     Vector3 local_force =  stress * area;
     Vector3 structural_damping = material->d_structural * stress_rate * area;
+    Vector3 hydrostatic_damping = Vector3(1, 1, 0);
+    hydrostatic_damping *= dViscous * (strain_rate.x() + strain_rate.y());
     
     // 6: nodal forces with virtual power
     // T.T * B.T * stress
@@ -121,9 +140,9 @@ void Membrane3::makeStep(double h)
     for (int i = 0; i < nodes.size(); i++)
     {
         local_node_force.setZero();
-        local_node_force.x() += B(0, i) * (local_force(0) + structural_damping(0))
+        local_node_force.x() += B(0, i) * (local_force(0) + structural_damping(0) + hydrostatic_damping(0))
                              +  B(1, i) * (local_force(2) + structural_damping(2));
-        local_node_force.y() += B(1, i) * (local_force(1) + structural_damping(1))
+        local_node_force.y() += B(1, i) * (local_force(1) + structural_damping(1) + hydrostatic_damping(1))
                              +  B(0, i) * (local_force(2) + structural_damping(2));
         nodes[i]->internalForce += coordSys.toGlobal(local_node_force);
     }
@@ -185,6 +204,17 @@ Membrane4::Membrane4(std::vector<NodePtr> points,
             }
         }
     }
+    double smallestSide = (nodes.back()->position - nodes[0]->position).norm();
+    for (int i=0; i < nodes.size() - 1; i++)
+    {
+        double sideLen = (nodes[i]->position - nodes[i+1]->position).norm();
+        if (sideLen < smallestSide)
+            smallestSide = sideLen;
+    }
+    dViscous = smallestSide * material->waveSpeed() * 
+               material->rho * material->d_minMode;
+    characteristicLength = smallestSide;
+
 }
 
 void Membrane4::initHG()
@@ -205,7 +235,7 @@ void Membrane4::initHG()
     hg_gamma = h - (h.dot(pos_mat.col(0)) * B0 + h.dot(pos_mat.col(0)) * B1);
 }
     
-void Membrane4::makeStep(double h)
+void Membrane4::explicitStep(double h)
 {    // 0: properties
     if (not is_valid)
         return;
@@ -273,17 +303,18 @@ void Membrane4::makeStep(double h)
         // 5: integrate sigma
         int_point.stress += h * stress_rate;
         Vector3 local_force = int_point.stress * area;
-        Vector3 structural_damping = material->d_structural * stress_rate * area;
-
+        Vector3 structural_damping = material->d_structural * strain_rate * area;
+        Vector3 hydrostatic_damping = Vector3(1, 1, 0);
+        hydrostatic_damping *= dViscous * (strain_rate.x() + strain_rate.y());
         // 6: nodal forces due to internal work
         Vector2 local_node_force;
         
         for (int i = 0; i < nodes.size(); i++)
             {
                 local_node_force.setZero();
-                local_node_force.x() += B(0, i) * (local_force(0) + structural_damping(0))
+                local_node_force.x() += B(0, i) * (local_force(0) + structural_damping(0) + hydrostatic_damping(0))
                                      +  B(1, i) * (local_force(2) + structural_damping(2));
-                local_node_force.y() += B(1, i) * (local_force(1) + structural_damping(1))
+                local_node_force.y() += B(1, i) * (local_force(1) + structural_damping(1) + hydrostatic_damping(1))
                                      +  B(0, i) * (local_force(2) + structural_damping(2));
                 nodes[i]->internalForce += int_point.weight * coordSys.toGlobal(local_node_force);
             }

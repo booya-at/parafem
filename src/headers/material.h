@@ -10,10 +10,12 @@ namespace paraFEM{
 class Material: Base
 {
 public:
-    double rho = 1.;
-    double d_structural = 1.;
-    double d_velocity = 1.;
     double elasticity = 10000.;
+    double rho = 1.;
+    double d_structural = 0.0001;
+    double d_velocity = 1.;
+    double d_minMode = 0.000;
+    virtual double waveSpeed() = 0;
 };
 
 
@@ -21,6 +23,7 @@ class TrussMaterial: public Material
 {
 public:
     TrussMaterial(double elasticity);
+    virtual double waveSpeed();
 };
 
 
@@ -30,6 +33,7 @@ public:
     MembraneMaterial(double elasticity, double nue);
     double nue;
     Eigen::Matrix3d C;
+    virtual double waveSpeed();
 };
 
 typedef std::shared_ptr<Material> MaterialPtr;

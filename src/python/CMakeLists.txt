@@ -20,7 +20,6 @@ set_target_properties(_paraFEM PROPERTIES INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/
 set_target_properties(_paraFEM PROPERTIES PREFIX "")
 
 
-configure_file(test.py ${CMAKE_BINARY_DIR}/paraFEM/test.py COPYONLY)
 configure_file(__init__.py ${CMAKE_BINARY_DIR}/paraFEM/__init__.py COPYONLY)
 
 

@@ -15,7 +15,7 @@ FemCase::FemCase(std::vector<ElementPtr> elements)
             this->nodes.insert(node);
         this->elements.push_back(element);
         elTimeStep = element->characteristicLength / element->getMaterial()->waveSpeed();
-        if (elTimeStep < minTimeStep)
+        if (elTimeStep < minTimeStep and elTimeStep != 0)
             minTimeStep = elTimeStep;
     }
     std::cout << "minTimeStep= " << minTimeStep << std::endl;

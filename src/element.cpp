@@ -32,11 +32,19 @@ CoordSys::CoordSys(Vector3 n_vec, Vector3 t1_vec)
 void CoordSys::update(Vector3 n_vec)
 {
     n = n_vec;
-    t2 = n.cross(t1);
-    t1 = t2.cross(n);
     n.normalize();
-    t1.normalize();
+    t2 = n.cross(t1);
     t2.normalize();
+    t1 = t2.cross(n);
+    mat.row(0) = t1;
+    mat.row(1) = t2;
+}
+
+void CoordSys::update(Vector3 n_vec, Vector3 t1_vec)
+{
+    n = n_vec; n.normalize();
+    t1 = t1_vec; t1.normalize();
+    t2 = n.cross(t1);
     mat.row(0) = t1;
     mat.row(1) = t2;
 }
@@ -78,12 +86,6 @@ std::vector< int > Element::getNr()
     return numbers;
 }
 
-
-void Element::setFixed()
-{
-    for (auto node: nodes)
-        node->fixed << 0, 0, 0;
-}
 
 IntegrationPoint::IntegrationPoint(double eta_in, double zeta_in, double weight_in)
 {

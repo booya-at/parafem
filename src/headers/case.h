@@ -8,6 +8,7 @@
 #include "base.h"
 #include "node.h"
 #include "element.h"
+#include "constraint.h"
 
 #include "eigen3/Eigen/Core"
 
@@ -19,8 +20,13 @@ class FemCase: Base
 public:
     double time=0;
     FemCase(std::vector<ElementPtr>);
+	FemCase(std::vector<ElementPtr> elements, 
+            std::vector<PositionConstraintPtr>,
+            std::vector<ForceConstraintPtr>);
     std::set<NodePtr> nodes;
-    ElementVec elements;
+    std::vector<ElementPtr> elements;
+    std::vector<ForceConstraintPtr> forceConstraints;
+    std::vector<PositionConstraintPtr> posConstraints;
     void explicitStep(double h, double externalFactor=1);
     void implicitStep(double h, double externalFactor=1);
 

@@ -28,6 +28,8 @@ struct CoordSys: Base
     void rotate(std::vector<Vector2>, std::vector<Vector2>);
     void rotate(Eigen::MatrixX2d, Eigen::MatrixX2d);
     void update(Vector3);
+    
+    void update(Vector3, Vector3);
     Vector2 toLocal(Vector3);
     Vector3 toGlobal(Vector2);
     
@@ -48,7 +50,6 @@ struct Element: Base
     virtual void explicitStep(double h) = 0;  // compute the internal forces acting on the nodes.
     std::vector<int> getNr();
     virtual Vector3 getStress()=0;
-    void setFixed();
     bool is_valid = true;
     double dViscous;
     double characteristicLength;
@@ -71,11 +72,12 @@ struct Truss: public Element
 
 struct LineJoint: public Element
 {
+// elment that connects nodes that are not exactly matching
     LineJoint(const std::vector<NodePtr>, std::shared_ptr<TrussMaterial>);
     virtual void explicitStep(double h);
     virtual Vector3 getStress();
     std::shared_ptr<TrussMaterial> material;
-};  
+};
 
 struct Membrane: public Element
 {

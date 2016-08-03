@@ -5,6 +5,14 @@
 
 namespace paraFEM {
 
+FemCase::FemCase(std::vector<ElementPtr> elements, 
+                 std::vector<PositionConstraintPtr> posConstraints,
+                 std::vector<ForceConstraintPtr> forceConstraints): FemCase::FemCase(elements)
+{
+    this->posConstraints = posConstraints;
+    this->forceConstraints = forceConstraints;
+}
+
 FemCase::FemCase(std::vector<ElementPtr> elements)
 {
     double minTimeStep = 1;

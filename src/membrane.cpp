@@ -84,7 +84,7 @@ void Membrane3::explicitStep(double h)
     Vector3 n = (nodes[1]->position - nodes[0]->position).cross(
                  nodes[2]->position - nodes[1]->position);
     area = n.norm() / 2.;
-    coordSys.update(n / area / 2);
+    coordSys.update(n / area / 2, nodes[1]->position - nodes[0]->position);
 
     //      get the local position for the updated coordinate system
     Eigen::Matrix<double, 3, 2> new_pos_mat;
@@ -96,7 +96,7 @@ void Membrane3::explicitStep(double h)
     }
     
     //      find rotation of the local coordinates and rotate the coordinate system
-    coordSys.rotate(pos_mat, new_pos_mat);
+    // coordSys.rotate(pos_mat, new_pos_mat);
 
     row_count = 0;
     for (auto node: nodes)

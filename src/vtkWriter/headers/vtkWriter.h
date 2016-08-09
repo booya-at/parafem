@@ -3,7 +3,7 @@
 
 #include "case.h"
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include <iostream>
 #include <fstream>
 #include <string>

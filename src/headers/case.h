@@ -10,7 +10,7 @@
 #include "element.h"
 #include "constraint.h"
 
-#include "eigen3/Eigen/Core"
+#include "Eigen/Core"
 
 namespace paraFEM
 {

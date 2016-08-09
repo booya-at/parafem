@@ -4,7 +4,7 @@
 #include "base.h"
 #include "node.h"
 #include "material.h"
-#include "eigen3/Eigen/Geometry"
+#include "Eigen/Geometry"
 #include <memory>
 #include <vector>
 

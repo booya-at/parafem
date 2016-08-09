@@ -2,7 +2,7 @@
 #define NODE_H
 
 #include "base.h"
-#include "eigen3/Eigen/Geometry"
+#include "Eigen/Geometry"
 #include <memory>
 
 

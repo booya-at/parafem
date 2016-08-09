@@ -2,7 +2,7 @@
 #define MATERIAL_H
 
 #include "base.h"
-#include "eigen3/Eigen/Core"
+#include "Eigen/Core"
 #include <memory>
 
 namespace paraFEM{

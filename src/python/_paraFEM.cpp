@@ -46,7 +46,8 @@ void init_paraFEM(py::module &m){
         .def(py::init<double, double>());
 
     py::class_<paraFEM::Element, paraFEM::ElementPtr>(m, "__Element")
-        .def("getStress", &paraFEM::Element::getStress);
+        .def("getStress", &paraFEM::Element::getStress)
+        .def_readonly("nodes", &paraFEM::Element::nodes);
 
     py::class_<paraFEM::Membrane, paraFEM::MembranePtr>(m, "__Membrane", py::base<paraFEM::Element>())
         .def_readwrite("pressure", &paraFEM::Membrane::pressure)

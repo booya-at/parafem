@@ -1,9 +1,9 @@
 import paraFEM
-
+import os
 vertices = []
 triangles = []
 
-with open("half_sphere.obj") as fo:
+with open(os.path.dirname(__file__) + "/half_sphere.obj") as fo:
     for i, line in enumerate(fo):
         if i < 2:
             continue
@@ -14,4 +14,7 @@ with open("half_sphere.obj") as fo:
 
 unwrapper = paraFEM.LscmRelax(vertices, triangles, [])
 unwrapper.lscm()
+unwrapper.relax(0.01)
 print(unwrapper.flat_vertices)
+print(unwrapper.rhs)
+print(unwrapper.sol)

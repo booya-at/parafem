@@ -3,6 +3,7 @@
 #include <Eigen/SVD>
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 
 // TODO:
 // vertices, flat vertices = EIgen::MatrixXd (better python conversation, parallell)
@@ -12,7 +13,7 @@
 
 namespace paraFEM{
 
-typedef Eigen::Triplet<double> T;
+typedef Eigen::Triplet<double> trip;
 typedef Eigen::SparseMatrix<double> spMat;
 
 
@@ -96,6 +97,14 @@ void LscmRelax::init(
         this->new_order[index] = j;
         j++;
     }
+
+    // set the C-mat
+    double rho = (1 - this->nue) / (1 - 2 * this->nue);
+    double rho1 = this->nue / (1 - 2 * this->nue);
+    this->C << 1,   nue, 0,
+                nue, 1,  0,
+                0,   0, (1 - nue) / 2;
+    this->C *= elasticity / (1 - nue * nue);
 }
 
 LscmRelax::LscmRelax(
@@ -134,24 +143,87 @@ LscmRelax::LscmRelax(std::vector<std::array<double, 3>> vertices,
 //////////////////////////////////////////////////////////////////////////
 /////////////////                 F.E.M                      /////////////
 //////////////////////////////////////////////////////////////////////////
-void LscmRelax::relax(double step_size)
+void LscmRelax::relax(double weight)
 {
+    this->set_q_l_m();
+    ColMat<double, 3> d_q_l_g = this->q_l_g - this->q_l_m;
     // for every triangle
+    Eigen::Matrix<double, 3, 6> B;
+    Eigen::Matrix<double, 2, 2> T;
+    Eigen::Matrix<double, 6, 6> K_m;
+    Eigen::Matrix<double, 6, 1> u_m, rhs_m;
+    Eigen::VectorXd rhs(this->vertices.cols() * 2);
+    Eigen::VectorXd sol(this->vertices.cols() * 2);
+    spMat K_g(this->vertices.cols() * 2, this->vertices.cols() * 2);
+    std::vector<trip> K_g_triplets;
+    Vector2 v0, v1, v2, v12, v23, v31;
+    long row_pos, col_pos;
+    double A;
 
+    rhs.setZero();
+
+    for (long i=0; i<this->triangles.cols(); i++)
+    {
         // 1: construct B-mat in m-system
+        v0 = this->flat_vertices.col(this->triangles(0, i));
+        v1 = this->flat_vertices.col(this->triangles(1, i));
+        v2 = this->flat_vertices.col(this->triangles(2, i));
+        v12 = v1 - v0;
+        v23 = v2 - v1;
+        v31 = v0 - v1;
+        B << -v23.y(),   0,        -v31.y(),   0,        -v12.y(),   0,
+              0,         v23.x(),   0,         v31.x(),   0,         v12.x(),
+              v23.x(),  -v23.y(),   v31.x(),  -v31.y(),   v12.x(),  -v12.y();
+        T << v12.x(), -v12.y(),
+             v12.y(), v12.x();
+        T /= v12.norm();
+        A = std::abs(this->q_l_m(i, 0) * this->q_l_m(i, 2) / 2);
+        B /= A * 2; // (2*area)
 
         // 2: sigma due dqlg in m-system
+        u_m << Vector2(0, 0), T * Vector2(d_q_l_g(i, 0), 0), T * Vector2(d_q_l_g(i, 1), d_q_l_g(i, 2));
 
         // 3: rhs_m = B.T * C * B * dqlg_m
-
-        // 4: K_m = B.T * C * B
+        //    K_m = B.T * C * B
+        rhs_m = B.transpose() * this->C * B * u_m * A;
+        K_m = B.transpose() * this->C * B * A;
 
         // 5: add to rhs_g, K_g
+        for (int j=0; j < 3; j++)
+        {
+            row_pos = this->triangles(j, i);
 
-    // solve linear system
+            rhs[row_pos * 2]     += rhs_m[j * 2];
+            rhs[row_pos * 2 + 1] += rhs_m[j * 2 +1];
+            for (int k=0; k < 3; k++)
+            {
+                col_pos = this->triangles(k, i);
+                K_g_triplets.push_back(trip(row_pos * 2,     col_pos * 2,        K_m(j * 2,      k * 2)));
+                K_g_triplets.push_back(trip(row_pos * 2 + 1, col_pos * 2,        K_m(j * 2 + 1,  k * 2)));
+                K_g_triplets.push_back(trip(row_pos * 2 + 1, col_pos * 2 + 1,    K_m(j * 2 + 1,  k * 2 + 1)));
+                K_g_triplets.push_back(trip(row_pos * 2,     col_pos * 2 + 1,    K_m(j * 2,      k * 2 + 1)));
+                // we don't have to fill all because the matrix is symetric.
+            }
+        }
+        K_g.setFromTriplets(K_g_triplets.begin(), K_g_triplets.end());
+    }
+    // solve linear system (privately store the value for guess in next step)
+    Eigen::ConjugateGradient<spMat, Eigen::Lower> solver;
+    solver.compute(K_g);
+    sol = solver.solve(rhs);
+    // std::cout << "qlm" << this->q_l_m << std::endl;
+    // std::cout << "qlg" << this->q_l_g << std::endl;
+    std::cout << "u_m  " << u_m << std::endl;
+    // std::cout << "rhs_m  " << rhs_m << std::endl;
+    std::cout << "B  " << B << std::endl;
+    // std::cout << "sol  " << sol << std::endl;
+    // reset coordinates of the flat vertices, recalc the qlm-mat
+    this->set_shift(sol * weight);
+    this->set_q_l_m();
+    this->sol = sol;
+    this->rhs = rhs;
+    this->MATRIX = K_g;
 
-    // reset coordinates
-    
 }
 
 
@@ -161,7 +233,7 @@ void LscmRelax::relax(double step_size)
 void LscmRelax::lscm()
 {
     this->set_q_l_g();
-    std::vector<T> triple_list;
+    std::vector<trip> triple_list;
     long i;
     double x21, x31, y31, x32;
 
@@ -173,22 +245,22 @@ void LscmRelax::lscm()
         y31 = this->q_l_g(i, 2);
         x32 = x31 - x21;
 
-        triple_list.push_back(T(2 * i, this->new_order[this->triangles(0, i)] * 2, x32));
-        triple_list.push_back(T(2 * i, this->new_order[this->triangles(0, i)] * 2 + 1, -y31));
-        triple_list.push_back(T(2 * i, this->new_order[this->triangles(1, i)] * 2, -x31));
-        triple_list.push_back(T(2 * i, this->new_order[this->triangles(1, i)] * 2 + 1, y31));
-        triple_list.push_back(T(2 * i, this->new_order[this->triangles(2, i)] * 2, x21));
+        triple_list.push_back(trip(2 * i, this->new_order[this->triangles(0, i)] * 2, x32));
+        triple_list.push_back(trip(2 * i, this->new_order[this->triangles(0, i)] * 2 + 1, -y31));
+        triple_list.push_back(trip(2 * i, this->new_order[this->triangles(1, i)] * 2, -x31));
+        triple_list.push_back(trip(2 * i, this->new_order[this->triangles(1, i)] * 2 + 1, y31));
+        triple_list.push_back(trip(2 * i, this->new_order[this->triangles(2, i)] * 2, x21));
 
-        triple_list.push_back(T(2 * i + 1, this->new_order[this->triangles(0, i)] * 2, y31));
-        triple_list.push_back(T(2 * i + 1, this->new_order[this->triangles(0, i)] * 2 + 1, x32));
-        triple_list.push_back(T(2 * i + 1, this->new_order[this->triangles(1, i)] * 2, -y31));
-        triple_list.push_back(T(2 * i + 1, this->new_order[this->triangles(1, i)] * 2 + 1, -x31));
-        triple_list.push_back(T(2 * i + 1, this->new_order[this->triangles(2, i)] * 2 + 1, x21));
+        triple_list.push_back(trip(2 * i + 1, this->new_order[this->triangles(0, i)] * 2, y31));
+        triple_list.push_back(trip(2 * i + 1, this->new_order[this->triangles(0, i)] * 2 + 1, x32));
+        triple_list.push_back(trip(2 * i + 1, this->new_order[this->triangles(1, i)] * 2, -y31));
+        triple_list.push_back(trip(2 * i + 1, this->new_order[this->triangles(1, i)] * 2 + 1, -x31));
+        triple_list.push_back(trip(2 * i + 1, this->new_order[this->triangles(2, i)] * 2 + 1, x21));
 
     }
     // 2. divide the triplets in matrix(unknown part) and rhs(known part) and reset the position
-    std::vector<T> rhs_triplets;
-    std::vector<T> mat_triplets;
+    std::vector<trip> rhs_triplets;
+    std::vector<trip> mat_triplets;
     for (auto triplet: triple_list)
     {
         if (triplet.col() > (this->vertices.cols() - this->fixed_pins.size()) * 2 - 1)
@@ -223,20 +295,8 @@ void LscmRelax::lscm()
     solver.compute(A);
     sol = solver.solve(-rhs);
 
-    std::cout << "rhs_triplets: " << rhs_triplets.size() << std::endl;
-    std::cout << "mat_triplets: " << mat_triplets.size() << std::endl;
-    // std::cout << "A: " << A << std::endl;
-    // std::cout << "sol: " << sol << std::endl;
-    // std::cout << "rhs: " << rhs << std::endl;
-    // std::cout << "B: " << B << std::endl;
-    // std::cout << "rhs_pos: " << rhs_pos << std::endl;
-
     // TODO: create function, is needed also in the fem step
-    for (i=0; i < this->vertices.size(); i++)
-    {
-        if (sol.size() > i * 2 + 1)
-            this->flat_vertices.col(this->old_order[i]) << sol[i * 2], sol[i * 2 + 1];
-    }
+    this->set_position(sol);
     // 7. if size of fixed pins <= 2: scale the map to the same area as the 3d mesh
 
 }
@@ -265,11 +325,9 @@ void LscmRelax::set_q_l_m()
     // get the coordinates of a triangle in local coordinates from the 2d map
     // x1, y1, y2 = 0
     // -> vector<x2, x3, y3>
-    this->q_l_m.resize(this->triangles.rows(), 3);
-    for (long i = 0; i < this->triangles.rows(); i++)
+    this->q_l_m.resize(this->triangles.cols(), 3);
+    for (long i = 0; i < this->triangles.cols(); i++)
     {
-        // does this work?
-        std::cout << "set_q_l_m" << std::endl;
         Vector2 r1 = this->flat_vertices.col(this->triangles(0, i));
         Vector2 r2 = this->flat_vertices.col(this->triangles(1, i));
         Vector2 r3 = this->flat_vertices.col(this->triangles(2, i));
@@ -277,7 +335,7 @@ void LscmRelax::set_q_l_m()
         Vector2 r31 = r3 - r1;
         double r21_norm = r21.norm();
         r21.normalize();
-        this->q_l_g.row(i) = Vector3(r21_norm, r31.dot(r21), r31.x() * r21.y() - r31.y() * r21.x());
+        this->q_l_m.row(i) << r21_norm, r31.dot(r21), r31.x() * r21.y() - r31.y() * r21.x();
     }
 }
 
@@ -290,6 +348,7 @@ void LscmRelax::set_fixed_pins()
         this->fixed_pins.push_back(0);
     if (this->fixed_pins.size() == 1)
     {
+
         double dist;
         this->fixed_pins.push_back(get_max_distance(this->vertices.col(this->fixed_pins[0]), this->vertices, dist));
         this->flat_vertices.col(this->fixed_pins[0]) = Vector2(0, 0);
@@ -321,5 +380,21 @@ ColMat<double, 3> LscmRelax::get_flat_vertices_3D()
     return mat3d;
 }
 
+void LscmRelax::set_position(Eigen::VectorXd sol)
+{
+    for (long i=0; i < this->vertices.size(); i++)
+    {
+        if (sol.size() > i * 2 + 1)
+            this->flat_vertices.col(this->old_order[i]) << sol[i * 2], sol[i * 2 + 1];
+    }
+}
 
+void LscmRelax::set_shift(Eigen::VectorXd sol)
+{
+    for (long i=0; i < this->vertices.size(); i++)
+    {
+        if (sol.size() > i * 2 + 1)
+            this->flat_vertices.col(i) += Vector2(sol[i * 2], sol[i * 2 + 1]);
+    }
+}
 }

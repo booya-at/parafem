@@ -76,6 +76,9 @@ void init_paraFEM(py::module &m){
         .def(py::init<paraFEM::ColMat<double, 3>, paraFEM::ColMat<long, 3>, std::vector<long>>())
         .def("lscm", &paraFEM::LscmRelax::lscm)
         .def("relax", &paraFEM::LscmRelax::relax)
+        .def_readonly("sol", &paraFEM::LscmRelax::sol)
+        .def_readonly("rhs", &paraFEM::LscmRelax::rhs)
+        .def_readonly("MATRIX", &paraFEM::LscmRelax::MATRIX)
         .def_property_readonly("flat_vertices", [](paraFEM::LscmRelax& L){return L.flat_vertices.transpose();}, py::return_value_policy::copy)
         .def_property_readonly("flat_vertices_3D", &paraFEM::LscmRelax::get_flat_vertices_3D);
 }

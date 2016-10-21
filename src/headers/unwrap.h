@@ -17,7 +17,10 @@
 #include <tuple>
 
 #include "material.h"
-#include "Eigen/Geometry"
+#include <Eigen/Geometry>
+#include <Eigen/IterativeLinearSolvers>
+
+typedef Eigen::SparseMatrix<double> spMat;
 
 namespace paraFEM{
 
@@ -38,9 +41,13 @@ private:
     void set_q_l_g();
     void set_q_l_m();
     void set_fixed_pins();
+    void set_position(Eigen::VectorXd);
+    void set_shift(Eigen::VectorXd);
 
     std::vector<long> new_order;
     std::vector<long> old_order;
+
+    Eigen::Matrix<double, 3, 3> C;
 
     void init(
         RowMat<double, 3> vertices, 
@@ -61,12 +68,15 @@ public:
     RowMat<double, 3> vertices;
     RowMat<long, 3> triangles;
     RowMat<double, 2> flat_vertices;
+    ColMat<double, 1> sol;
+    ColMat<double, 1> rhs;
+    spMat MATRIX;
 
     double nue=0.5;
     double elasticity=1000.;
 
     void lscm();
-    void relax(double step_size);
+    void relax(double);
 
     ColMat<double, 1> get_alpha_distortion();
     ColMat<double, 1> get_internal_work();

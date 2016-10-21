@@ -28,5 +28,6 @@ int main(int argc, char **argv) {
 
     paraFEM::LscmRelax flattener(vertices, triangles, std::vector<long>());
     flattener.lscm();
+    flattener.relax(0.001);
     std::cout << flattener.flat_vertices << std::endl;
 }

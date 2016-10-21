@@ -3,6 +3,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/operators.h>
+#include <pybind11/eigen.h>
 
 #include "node.h"
 #include "element.h"
@@ -10,6 +11,8 @@
 #include "material.h"
 
 #include "vtkWriter.h"
+
+#include "unwrap.h"
 
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
@@ -67,6 +70,12 @@ void init_paraFEM(py::module &m){
         .def(py::init<std::vector<paraFEM::ElementPtr>>())
         .def("explicitStep", &paraFEM::FemCase::explicitStep, "make one explicit step",
             py::arg("h") = 0.0001, py::arg("externalFactor") = 1);
+
+    py::class_<paraFEM::LscmRelax>(m, "LscmRelax")
+        .def(py::init<std::vector<std::array<double, 3>>, std::vector<std::array<int, 3>>, std::vector<int>>())
+        .def("lscm", &paraFEM::LscmRelax::lscm)
+        .def_property_readonly("flat_vertices", &paraFEM::LscmRelax::get_flat_vertices)
+        .def_property_readonly("flat_vertices_3D", &paraFEM::LscmRelax::get_flat_vertices_3D);
 }
 
 

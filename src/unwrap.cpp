@@ -165,15 +165,15 @@ void LscmRelax::relax(double weight)
     for (long i=0; i<this->triangles.cols(); i++)
     {
         // 1: construct B-mat in m-system
-        v0 = this->flat_vertices.col(this->triangles(0, i));
-        v1 = this->flat_vertices.col(this->triangles(1, i));
-        v2 = this->flat_vertices.col(this->triangles(2, i));
-        v12 = v1 - v0;
-        v23 = v2 - v1;
-        v31 = v0 - v1;
+        v1 = this->flat_vertices.col(this->triangles(0, i));
+        v2 = this->flat_vertices.col(this->triangles(1, i));
+        v3 = this->flat_vertices.col(this->triangles(2, i));
+        v12 = v2 - v1;
+        v23 = v3 - v2;
+        v31 = v1 - v3;
         B << -v23.y(),   0,        -v31.y(),   0,        -v12.y(),   0,
               0,         v23.x(),   0,         v31.x(),   0,         v12.x(),
-              v23.x(),  -v23.y(),   v31.x(),  -v31.y(),   v12.x(),  -v12.y();
+             -v23.x(),   v23.y(),  -v31.x(),   v31.y(),  -v12.x(),   v12.y();
         T << v12.x(), -v12.y(),
              v12.y(), v12.x();
         T /= v12.norm();

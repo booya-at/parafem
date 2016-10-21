@@ -4,17 +4,18 @@
 #include "unwrap.h"
 #include "vtkWriter.h"
 
-typedef std::array<int, 3> triangle;
+typedef std::array<long, 3> triangle;
+typedef std::array<double, 3> point;
 
 int main(int argc, char **argv) {
     // cerate vertices
-    paraFEM::Vector3 p0(-1, -1, 0);
-    paraFEM::Vector3 p1(1, -1, 0);
-    paraFEM::Vector3 p2(1, 1, 0);
-    paraFEM::Vector3 p3(-1, 1, 0);
-    paraFEM::Vector3 p4(0, 0, 1);
+    point p0 {-1, -1, 0};
+    point p1 {1, -1, 0};
+    point p2 {1, 1, 0};
+    point p3 {-1, 1, 0};
+    point p4 {0, 0, 1};
 
-    std::vector<paraFEM::Vector3> vertices = {p0, p1, p2, p3, p4};
+    std::vector<point> vertices = {p0, p1, p2, p3, p4};
 
     // create triangles
     std::vector<triangle> triangles;
@@ -25,11 +26,7 @@ int main(int argc, char **argv) {
 
     paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/paraFEM/unwrap");
 
-    paraFEM::LscmRelax flattener(vertices, triangles, std::vector<int>());
-    for (auto point: flattener.get_flat_vertices())
-        std::cout << point << std::endl;
+    paraFEM::LscmRelax flattener(vertices, triangles, std::vector<long>());
     flattener.lscm();
-    for (auto point: flattener.get_flat_vertices())
-        std::cout << point << std::endl;
-
+    std::cout << flattener.flat_vertices << std::endl;
 }

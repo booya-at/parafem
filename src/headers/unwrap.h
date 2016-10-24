@@ -49,6 +49,9 @@ private:
 
     Eigen::Matrix<double, 3, 3> C;
 
+    void transform(bool scale=false);
+    std::vector<long> get_fem_fixed_pins();
+
     void init(
         RowMat<double, 3> vertices, 
         RowMat<long, 3> triangles,
@@ -70,7 +73,7 @@ public:
     RowMat<double, 2> flat_vertices;
     ColMat<double, 1> sol;
     ColMat<double, 1> rhs;
-    spMat MATRIX;
+    Eigen::MatrixXd MATRIX;
 
     double nue=0.5;
     double elasticity=1000.;
@@ -81,6 +84,12 @@ public:
     ColMat<double, 1> get_alpha_distortion();
     ColMat<double, 1> get_internal_work();
     ColMat<double, 3> get_flat_vertices_3D();
+
+    void rotate_by_min_bound_area();
+
+    double get_area();
+    double get_flat_area();
+
 };
 
 

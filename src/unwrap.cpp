@@ -5,6 +5,10 @@
 #include <algorithm>
 #include <cmath>
 
+#ifndef M_PI
+#define M_PI    3.14159265358979323846f
+#endif
+
 // TODO:
 // vertices, flat vertices = EIgen::MatrixXd (better python conversation, parallell)
 // make it a own library
@@ -145,7 +149,6 @@ LscmRelax::LscmRelax(std::vector<std::array<double, 3>> vertices,
 //////////////////////////////////////////////////////////////////////////
 void LscmRelax::relax(double weight)
 {
-    this->set_q_l_m();
     ColMat<double, 3> d_q_l_g = this->q_l_g - this->q_l_m;
     // for every triangle
     Eigen::Matrix<double, 3, 6> B;
@@ -156,7 +159,7 @@ void LscmRelax::relax(double weight)
     Eigen::VectorXd sol(this->vertices.cols() * 2);
     spMat K_g(this->vertices.cols() * 2, this->vertices.cols() * 2);
     std::vector<trip> K_g_triplets;
-    Vector2 v0, v1, v2, v12, v23, v31;
+    Vector2 v1, v2, v3, v12, v23, v31;
     long row_pos, col_pos;
     double A;
 
@@ -192,7 +195,6 @@ void LscmRelax::relax(double weight)
         for (int j=0; j < 3; j++)
         {
             row_pos = this->triangles(j, i);
-
             rhs[row_pos * 2]     += rhs_m[j * 2];
             rhs[row_pos * 2 + 1] += rhs_m[j * 2 +1];
             for (int k=0; k < 3; k++)
@@ -205,24 +207,71 @@ void LscmRelax::relax(double weight)
                 // we don't have to fill all because the matrix is symetric.
             }
         }
-        K_g.setFromTriplets(K_g_triplets.begin(), K_g_triplets.end());
     }
+    // FIXING SOME PINS:
+    // - if there are no pins (or only one pin) selected solve the system without the nullspace solution.
+    // - if there are some pins selected, delete all colums, rows that refer to this pins
+    //          set the diagonal element of these pins to 1 + the rhs to zero
+    //          (? is it possible to fix in the inner of the face? for sure for fem, but lscm could have some problems)
+    //          (we also need some extra variables to see if the pins come from user)
+    
+    // // fixing some points
+    // // allthough only internal forces are applied there has to be locked
+    // // at least 3 degrees of freedom to stop the mesh from pure rotation and pure translation
+    // std::vector<long> fixed_dof;
+    // fixed_dof.push_back(this->triangles(0, 0) * 2); //x0
+    // fixed_dof.push_back(this->triangles(0, 0) * 2 + 1); //y0
+    // fixed_dof.push_back(this->triangles(1, 0) * 2 + 1); // y1
+
+    // // align flat mesh to fixed edge
+    // Vector2 edge = this->flat_vertices.col(this->triangles(1, 0)) - 
+    //                this->flat_vertices.col(this->triangles(0, 0));
+    // edge.normalize();
+    // Eigen::Matrix<double, 2, 2> rot;
+    // rot << edge.x(), edge.y(), -edge.y(), edge.x();
+    // this->flat_vertices = rot * this->flat_vertices;
+
+    // // return true if triplet row / col is in fixed_dof
+    // auto is_in_fixed_dof = [fixed_dof](const trip & element) -> bool {
+    //     return (
+    //         (std::find(fixed_dof.begin(), fixed_dof.end(), element.row()) != fixed_dof.end()) or
+    //         (std::find(fixed_dof.begin(), fixed_dof.end(), element.col()) != fixed_dof.end()));
+    // };
+    // std::cout << "size of triplets: " << K_g_triplets.size() << std::endl;
+    // K_g_triplets.erase(
+    //     std::remove_if(K_g_triplets.begin(), K_g_triplets.end(), is_in_fixed_dof),
+    //     K_g_triplets.end());
+    // std::cout << "size of triplets: " << K_g_triplets.size() << std::endl;
+    // for (long fixed: fixed_dof)
+    // {
+    //     K_g_triplets.push_back(trip(fixed, fixed, 1.));
+    //     rhs[fixed] = 0;
+    // }
+
+    // removing the NULL-SPACE solution
+    for (long i=0; i < this->vertices.cols() * 2; i++)
+        K_g_triplets.push_back(trip(i, i, 1));
+    K_g.setFromTriplets(K_g_triplets.begin(), K_g_triplets.end());
+    
     // solve linear system (privately store the value for guess in next step)
     Eigen::ConjugateGradient<spMat, Eigen::Lower> solver;
+    solver.setTolerance(0.000000000001);
     solver.compute(K_g);
     sol = solver.solve(rhs);
     // std::cout << "qlm" << this->q_l_m << std::endl;
     // std::cout << "qlg" << this->q_l_g << std::endl;
-    std::cout << "u_m  " << u_m << std::endl;
+    // std::cout << "u_m  " << u_m << std::endl;
     // std::cout << "rhs_m  " << rhs_m << std::endl;
-    std::cout << "B  " << B << std::endl;
+    // std::cout << "B  " << B << std::endl;
     // std::cout << "sol  " << sol << std::endl;
     // reset coordinates of the flat vertices, recalc the qlm-mat
     this->set_shift(sol * weight);
     this->set_q_l_m();
+    // this->transform();
+    // this->rotate_by_min_bound_area();
     this->sol = sol;
-    this->rhs = rhs;
     this->MATRIX = K_g;
+    this->rhs = rhs;
 
 }
 
@@ -297,6 +346,9 @@ void LscmRelax::lscm()
 
     // TODO: create function, is needed also in the fem step
     this->set_position(sol);
+    this->set_q_l_m();
+    this->transform(true);
+    this->rotate_by_min_bound_area();
     // 7. if size of fixed pins <= 2: scale the map to the same area as the 3d mesh
 
 }
@@ -335,7 +387,7 @@ void LscmRelax::set_q_l_m()
         Vector2 r31 = r3 - r1;
         double r21_norm = r21.norm();
         r21.normalize();
-        this->q_l_m.row(i) << r21_norm, r31.dot(r21), r31.x() * r21.y() - r31.y() * r21.x();
+        this->q_l_m.row(i) << r21_norm, r31.dot(r21), std::abs(r31.x() * r21.y() - r31.y() * r21.x());
     }
 }
 
@@ -397,4 +449,108 @@ void LscmRelax::set_shift(Eigen::VectorXd sol)
             this->flat_vertices.col(i) += Vector2(sol[i * 2], sol[i * 2 + 1]);
     }
 }
+
+double LscmRelax::get_area()
+{
+    double area = 0;
+    for(long i = 0; i < this->triangles.cols(); i++)
+    {
+        area += this->q_l_g(i, 0) * this->q_l_g(i, 2);
+    }
+    return area / 2;
+}
+
+double LscmRelax::get_flat_area()
+{
+    double area = 0;
+    for(long i = 0; i < this->triangles.cols(); i++)
+    {
+        area += this->q_l_m(i, 0) * this->q_l_m(i, 2);
+    }
+    return area / 2;
+}
+
+void LscmRelax::transform(bool scale)
+{
+    // assuming q_l_m and flat_vertices are set
+    Vector2 weighted_center, center;
+    weighted_center.setZero();
+    double flat_area = 0;
+    double global_area = 0;
+    double element_area;
+    for(long i = 0; i < this->triangles.cols(); i++)
+    {
+        global_area += this->q_l_g(i, 0) * this->q_l_g(i, 2) / 2;
+        element_area = this->q_l_m(i, 0) * this->q_l_m(i, 2) / 2;
+        for (int j=0; j < 3; j++)
+            weighted_center += this->flat_vertices.col(this->triangles(j, i)) * element_area / 3;
+        flat_area += element_area;
+    }
+    center = weighted_center / flat_area;
+    for (long i = 0; i < this->flat_vertices.cols(); i++)
+        this->flat_vertices.col(i) -= center;
+    if (scale)
+        this->flat_vertices *= std::pow(global_area / flat_area, 0.5);
+    this->set_q_l_m();
+}
+
+void LscmRelax::rotate_by_min_bound_area()
+{
+    int n = 100;
+    double phi;
+    double min_phi = 0;
+    double  min_area = 0;
+    bool x_dominant;
+    // rotate vector by 90 degree and find min area
+    for (int i = 0; i < n + 1; i++ )
+    {
+        phi = i * M_PI / n;
+        Eigen::VectorXd x_proj = this->flat_vertices.transpose() * Vector2(std::cos(phi), std::sin(phi));
+        Eigen::VectorXd y_proj = this->flat_vertices.transpose() * Vector2(-std::sin(phi), std::cos(phi));
+        double x_distance = x_proj.maxCoeff() - x_proj.minCoeff();
+        double y_distance = y_proj.maxCoeff() - y_proj.minCoeff();
+        double area = x_distance * y_distance;
+        if (min_area == 0 or area < min_area)
+        {
+            min_area = area;
+            min_phi = phi;
+            x_dominant = x_distance > y_distance;
+        }
+        Eigen::Matrix<double, 2, 2> rot;
+        min_phi += x_dominant * M_PI / 2;
+        rot << std::cos(min_phi), std::sin(min_phi), -std::sin(min_phi), std::cos(min_phi);
+        this->flat_vertices = rot * this->flat_vertices;
+    }
+}
+
+std::vector<long> LscmRelax::get_fem_fixed_pins()
+{
+    long min_x_index = 0;
+    double min_x = this->vertices(0, 0);
+    for (long i=0; i<this->flat_vertices.cols(); i++)
+    {
+        // get index with min x
+        if (this->flat_vertices(0, i) < min_x)
+        {
+            min_x = this->flat_vertices(0, i);
+            min_x_index = i;
+        }
+    }
+    double min_y = this->flat_vertices(1, min_x_index);
+    long max_x_index = 0;
+    double max_x = 0;
+    for (long i=0; i<this->flat_vertices.cols(); i++)
+    {
+        // get index with min x
+        double d_x = (this->flat_vertices(0, i) - min_x);
+        double d_y = (this->flat_vertices(1, i) - min_y);
+        if (d_x * d_x - d_y * d_y > max_x)
+        {
+            max_x = d_x * d_x - d_y * d_y;
+            max_x_index = i;
+        }
+    }
+    return std::vector<long>{min_x_index * 2, min_x_index * 2 + 1, max_x_index * 2 + 1};
+}
+
 }

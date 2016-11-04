@@ -48,6 +48,7 @@ struct Element: Base
 {
     std::vector<NodePtr> nodes;
     virtual void explicitStep(double h) = 0;  // compute the internal forces acting on the nodes.
+    virtual void implicitStep(double h) = 0;
     std::vector<int> getNr();
     virtual Vector3 getStress()=0;
     bool is_valid = true;
@@ -65,6 +66,7 @@ struct Truss: public Element
     virtual Vector3 getStress();
     double stress;           // at timestep n
     virtual void explicitStep(double h);
+    virtual void implicitStep(double h);
     std::shared_ptr<TrussMaterial> material;
     void addNodalPressure(Vector3);
     MaterialPtr getMaterial();

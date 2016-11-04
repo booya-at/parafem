@@ -48,6 +48,7 @@ private:
     std::vector<long> old_order;
 
     Eigen::Matrix<double, 3, 3> C;
+    Eigen::VectorXd sol;
 
     void transform(bool scale=false);
     std::vector<long> get_fem_fixed_pins();
@@ -71,12 +72,11 @@ public:
     RowMat<double, 3> vertices;
     RowMat<long, 3> triangles;
     RowMat<double, 2> flat_vertices;
-    ColMat<double, 1> sol;
     ColMat<double, 1> rhs;
     Eigen::MatrixXd MATRIX;
 
-    double nue=0.5;
-    double elasticity=1000.;
+    double nue=0.0;
+    double elasticity=1.;
 
     void lscm();
     void relax(double);

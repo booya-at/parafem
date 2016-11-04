@@ -149,14 +149,15 @@ LscmRelax::LscmRelax(std::vector<std::array<double, 3>> vertices,
 //////////////////////////////////////////////////////////////////////////
 void LscmRelax::relax(double weight)
 {
-    ColMat<double, 3> d_q_l_g = this->q_l_g - this->q_l_m;
+    ColMat<double, 3> d_q_l_g = this->q_l_m - this->q_l_g;
     // for every triangle
     Eigen::Matrix<double, 3, 6> B;
     Eigen::Matrix<double, 2, 2> T;
     Eigen::Matrix<double, 6, 6> K_m;
     Eigen::Matrix<double, 6, 1> u_m, rhs_m;
     Eigen::VectorXd rhs(this->vertices.cols() * 2);
-    Eigen::VectorXd sol(this->vertices.cols() * 2);
+    if (this->sol.size() == 0)
+        this->sol.Zero(this->vertices.cols() * 2);
     spMat K_g(this->vertices.cols() * 2, this->vertices.cols() * 2);
     std::vector<trip> K_g_triplets;
     Vector2 v1, v2, v3, v12, v23, v31;
@@ -248,16 +249,15 @@ void LscmRelax::relax(double weight)
     //     rhs[fixed] = 0;
     // }
 
-    // removing the NULL-SPACE solution
-    for (long i=0; i < this->vertices.cols() * 2; i++)
-        K_g_triplets.push_back(trip(i, i, 1));
+    for (long i=0; i< this->vertices.cols() * 2; i++)
+        K_g_triplets.push_back(trip(i, i, 0.01));
     K_g.setFromTriplets(K_g_triplets.begin(), K_g_triplets.end());
     
     // solve linear system (privately store the value for guess in next step)
     Eigen::ConjugateGradient<spMat, Eigen::Lower> solver;
-    solver.setTolerance(0.000000000001);
+    solver.setTolerance(0.0000000000001);
     solver.compute(K_g);
-    sol = solver.solve(rhs);
+    this->sol = solver.solveWithGuess(-rhs, this->sol);
     // std::cout << "qlm" << this->q_l_m << std::endl;
     // std::cout << "qlg" << this->q_l_g << std::endl;
     // std::cout << "u_m  " << u_m << std::endl;
@@ -265,14 +265,11 @@ void LscmRelax::relax(double weight)
     // std::cout << "B  " << B << std::endl;
     // std::cout << "sol  " << sol << std::endl;
     // reset coordinates of the flat vertices, recalc the qlm-mat
-    this->set_shift(sol * weight);
+    this->set_shift(this->sol.head(this->vertices.cols() * 2) * weight);
     this->set_q_l_m();
     // this->transform();
     // this->rotate_by_min_bound_area();
-    this->sol = sol;
     this->MATRIX = K_g;
-    this->rhs = rhs;
-
 }
 
 
@@ -368,6 +365,7 @@ void LscmRelax::set_q_l_g()
         Vector3 r31 = r3 - r1;
         double r21_norm = r21.norm();
         r21.normalize();
+        // if triangle is fliped this gives wrong results?
         this->q_l_g.row(i) << r21_norm, r31.dot(r21), r31.cross(r21).norm();
     }
 }
@@ -387,7 +385,8 @@ void LscmRelax::set_q_l_m()
         Vector2 r31 = r3 - r1;
         double r21_norm = r21.norm();
         r21.normalize();
-        this->q_l_m.row(i) << r21_norm, r31.dot(r21), std::abs(r31.x() * r21.y() - r31.y() * r21.x());
+        // if triangle is fliped this gives wrong results!
+        this->q_l_m.row(i) << r21_norm, r31.dot(r21), -(r31.x() * r21.y() - r31.y() * r21.x());
     }
 }
 

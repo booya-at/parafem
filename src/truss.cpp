@@ -49,6 +49,30 @@ void Truss::explicitStep(double h)
         node->internalForce += node->velocity * material->d_velocity * new_length / nodes.size();
 }
 
+void Truss::implicitStep(std::vector<trip> & Kt)
+{   
+    // update the coordinate system
+    tangent =  nodes[1]->position - nodes[0]->position;
+    double length = tangent.norm();
+    tangent.normalize();
+    Eigen::Matrix<double, 2, 6> B;
+    Eigen::Matrix<double, 6, 6> K;
+    B << -tangent, Vector3(0, 0, 0), Vector3(0, 0, 0), tangent;
+    B /= length;
+    K = material->elasticity * B.transpose() * B;
+    std::vector<int> mat_pos;
+    for (auto node: this->nodes)
+    {
+        for (int i=0; i < 3; i++)
+            mat_pos.push_back(node->nr * 3 + i);
+    }
+    for (int i=0; i < 6; i++)
+    {
+        for (int j=0; j < 6; j++)
+            Kt.push_back(trip(mat_pos[i], mat_pos[j], K(i, j)));
+    }
+}
+
 Vector3 Truss::getStress()
 {
     return stress * tangent;

@@ -5,12 +5,14 @@
 #include "node.h"
 #include "material.h"
 #include "Eigen/Geometry"
+#include <Eigen/IterativeLinearSolvers>
 #include <memory>
 #include <vector>
 
 namespace paraFEM
 {
 
+typedef Eigen::Triplet<double> trip;
 
 Eigen::Matrix2Xd toMatrix(std::vector<Vector2>);
 Eigen::Matrix2d findRotMat(std::vector<Vector2>, std::vector<Vector2>);
@@ -48,7 +50,7 @@ struct Element: Base
 {
     std::vector<NodePtr> nodes;
     virtual void explicitStep(double h) = 0;  // compute the internal forces acting on the nodes.
-    virtual void implicitStep(double h) = 0;
+    // virtual void implicitStep(double h) = 0;
     std::vector<int> getNr();
     virtual Vector3 getStress()=0;
     bool is_valid = true;
@@ -66,7 +68,7 @@ struct Truss: public Element
     virtual Vector3 getStress();
     double stress;           // at timestep n
     virtual void explicitStep(double h);
-    virtual void implicitStep(double h);
+    virtual void implicitStep(std::vector<trip> & Kt);
     std::shared_ptr<TrussMaterial> material;
     void addNodalPressure(Vector3);
     MaterialPtr getMaterial();

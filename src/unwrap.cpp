@@ -216,59 +216,49 @@ void LscmRelax::relax(double weight)
     //          (? is it possible to fix in the inner of the face? for sure for fem, but lscm could have some problems)
     //          (we also need some extra variables to see if the pins come from user)
     
-    // // fixing some points
-    // // allthough only internal forces are applied there has to be locked
-    // // at least 3 degrees of freedom to stop the mesh from pure rotation and pure translation
-    // std::vector<long> fixed_dof;
-    // fixed_dof.push_back(this->triangles(0, 0) * 2); //x0
-    // fixed_dof.push_back(this->triangles(0, 0) * 2 + 1); //y0
-    // fixed_dof.push_back(this->triangles(1, 0) * 2 + 1); // y1
+    // fixing some points
+    // allthough only internal forces are applied there has to be locked
+    // at least 3 degrees of freedom to stop the mesh from pure rotation and pure translation
+    std::vector<long> fixed_dof;
+    fixed_dof.push_back(this->triangles(0, 0) * 2); //x0
+    fixed_dof.push_back(this->triangles(0, 0) * 2 + 1); //y0
+    fixed_dof.push_back(this->triangles(1, 0) * 2 + 1); // y1
 
-    // // align flat mesh to fixed edge
-    // Vector2 edge = this->flat_vertices.col(this->triangles(1, 0)) - 
-    //                this->flat_vertices.col(this->triangles(0, 0));
-    // edge.normalize();
-    // Eigen::Matrix<double, 2, 2> rot;
-    // rot << edge.x(), edge.y(), -edge.y(), edge.x();
-    // this->flat_vertices = rot * this->flat_vertices;
+    // align flat mesh to fixed edge
+    Vector2 edge = this->flat_vertices.col(this->triangles(1, 0)) - 
+                   this->flat_vertices.col(this->triangles(0, 0));
+    edge.normalize();
+    Eigen::Matrix<double, 2, 2> rot;
+    rot << edge.x(), edge.y(), -edge.y(), edge.x();
+    this->flat_vertices = rot * this->flat_vertices;
 
-    // // return true if triplet row / col is in fixed_dof
-    // auto is_in_fixed_dof = [fixed_dof](const trip & element) -> bool {
-    //     return (
-    //         (std::find(fixed_dof.begin(), fixed_dof.end(), element.row()) != fixed_dof.end()) or
-    //         (std::find(fixed_dof.begin(), fixed_dof.end(), element.col()) != fixed_dof.end()));
-    // };
-    // std::cout << "size of triplets: " << K_g_triplets.size() << std::endl;
-    // K_g_triplets.erase(
-    //     std::remove_if(K_g_triplets.begin(), K_g_triplets.end(), is_in_fixed_dof),
-    //     K_g_triplets.end());
-    // std::cout << "size of triplets: " << K_g_triplets.size() << std::endl;
-    // for (long fixed: fixed_dof)
-    // {
-    //     K_g_triplets.push_back(trip(fixed, fixed, 1.));
-    //     rhs[fixed] = 0;
-    // }
+    // return true if triplet row / col is in fixed_dof
+    auto is_in_fixed_dof = [fixed_dof](const trip & element) -> bool {
+        return (
+            (std::find(fixed_dof.begin(), fixed_dof.end(), element.row()) != fixed_dof.end()) or
+            (std::find(fixed_dof.begin(), fixed_dof.end(), element.col()) != fixed_dof.end()));
+    };
+    std::cout << "size of triplets: " << K_g_triplets.size() << std::endl;
+    K_g_triplets.erase(
+        std::remove_if(K_g_triplets.begin(), K_g_triplets.end(), is_in_fixed_dof),
+        K_g_triplets.end());
+    std::cout << "size of triplets: " << K_g_triplets.size() << std::endl;
+    for (long fixed: fixed_dof)
+    {
+        K_g_triplets.push_back(trip(fixed, fixed, 1.));
+        rhs[fixed] = 0;
+    }
 
-    for (long i=0; i< this->vertices.cols() * 2; i++)
-        K_g_triplets.push_back(trip(i, i, 0.01));
-    K_g.setFromTriplets(K_g_triplets.begin(), K_g_triplets.end());
+    // for (long i=0; i< this->vertices.cols() * 2; i++)
+    //     K_g_triplets.push_back(trip(i, i, 0.01));
+    // K_g.setFromTriplets(K_g_triplets.begin(), K_g_triplets.end());
     
     // solve linear system (privately store the value for guess in next step)
     Eigen::ConjugateGradient<spMat, Eigen::Lower> solver;
-    solver.setTolerance(0.0000000000001);
     solver.compute(K_g);
     this->sol = solver.solveWithGuess(-rhs, this->sol);
-    // std::cout << "qlm" << this->q_l_m << std::endl;
-    // std::cout << "qlg" << this->q_l_g << std::endl;
-    // std::cout << "u_m  " << u_m << std::endl;
-    // std::cout << "rhs_m  " << rhs_m << std::endl;
-    // std::cout << "B  " << B << std::endl;
-    // std::cout << "sol  " << sol << std::endl;
-    // reset coordinates of the flat vertices, recalc the qlm-mat
     this->set_shift(this->sol.head(this->vertices.cols() * 2) * weight);
     this->set_q_l_m();
-    // this->transform();
-    // this->rotate_by_min_bound_area();
     this->MATRIX = K_g;
 }
 

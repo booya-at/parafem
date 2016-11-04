@@ -77,6 +77,7 @@ void init_paraFEM(py::module &m){
         .def("lscm", &paraFEM::LscmRelax::lscm)
         .def("relax", &paraFEM::LscmRelax::relax)
         .def("rotate_by_min_bound_area", &paraFEM::LscmRelax::rotate_by_min_bound_area)
+        .def("transform", &paraFEM::LscmRelax::transform)
         .def_readonly("rhs", &paraFEM::LscmRelax::rhs)
         .def_readonly("MATRIX", &paraFEM::LscmRelax::MATRIX)
         .def_property_readonly("area", &paraFEM::LscmRelax::get_area)

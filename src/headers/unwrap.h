@@ -50,7 +50,6 @@ private:
     Eigen::Matrix<double, 3, 3> C;
     Eigen::VectorXd sol;
 
-    void transform(bool scale=false);
     std::vector<long> get_fem_fixed_pins();
 
     void init(
@@ -86,7 +85,8 @@ public:
     ColMat<double, 3> get_flat_vertices_3D();
 
     void rotate_by_min_bound_area();
-
+    void transform(bool scale=false);
+    
     double get_area();
     double get_flat_area();
 

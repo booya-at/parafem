@@ -251,10 +251,11 @@ void LscmRelax::relax(double weight)
 
     // for (long i=0; i< this->vertices.cols() * 2; i++)
     //     K_g_triplets.push_back(trip(i, i, 0.01));
-    // K_g.setFromTriplets(K_g_triplets.begin(), K_g_triplets.end());
+    K_g.setFromTriplets(K_g_triplets.begin(), K_g_triplets.end());
     
     // solve linear system (privately store the value for guess in next step)
     Eigen::ConjugateGradient<spMat, Eigen::Lower> solver;
+    solver.setTolerance(0.0000001);
     solver.compute(K_g);
     this->sol = solver.solveWithGuess(-rhs, this->sol);
     this->set_shift(this->sol.head(this->vertices.cols() * 2) * weight);

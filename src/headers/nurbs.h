@@ -1,6 +1,6 @@
 
-#ifndef UNWRAP_H
-#define UNWRAP_H
+#ifndef NURBS_H
+#define NURBS_H
 
 #include <Eigen/Geometry>
 #include <Eigen/IterativeLinearSolvers>
@@ -29,11 +29,11 @@ struct NurbsBase
     std::vector<std::function<double(double)>> Du_functions;
     std::vector<std::function<double(double)>> Dv_functions;
 
-    // std::vector<std::function<double(double)>> DDu_functions;
-    // std::vector<std::function<double(double)>> DDv_functions;
+    std::vector<std::function<double(double)>> DDu_functions;
+    std::vector<std::function<double(double)>> DDv_functions;
 
     void computeFirstDerivatives();
-    // void computeSecondDerivatives();
+    void computeSecondDerivatives();
 
     Eigen::VectorXd getInfluenceVector(Eigen::Vector2d u);
     spMat getInfluenceMatrix(Eigen::Matrix<double, Eigen::Dynamic, 2> U);

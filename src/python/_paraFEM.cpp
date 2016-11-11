@@ -13,6 +13,7 @@
 #include "vtkWriter.h"
 
 #include "unwrap.h"
+#include "nurbs.h"
 
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
@@ -84,6 +85,16 @@ void init_paraFEM(py::module &m){
         .def_property_readonly("flat_area", &paraFEM::LscmRelax::get_flat_area)
         .def_property_readonly("flat_vertices", [](paraFEM::LscmRelax& L){return L.flat_vertices.transpose();}, py::return_value_policy::copy)
         .def_property_readonly("flat_vertices_3D", &paraFEM::LscmRelax::get_flat_vertices_3D);
+
+    py::class_<paraFEM::NurbsBase>(m, "NurbsBase")
+        .def(py::init<Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXd, int, int>())
+        .def("computeFirstDerivatives", &paraFEM::NurbsBase::computeFirstDerivatives)
+        .def("getInfluenceVector", &paraFEM::NurbsBase::getInfluenceVector)
+        .def("getInfluenceMatrix", &paraFEM::NurbsBase::getInfluenceMatrix)
+        .def("getDuVector", &paraFEM::NurbsBase::getDuVector)
+        .def("getDuMatrix", &paraFEM::NurbsBase::getDuMatrix)
+        .def("getDvVector", &paraFEM::NurbsBase::getDvVector)
+        .def("getDvMatrix", &paraFEM::NurbsBase::getDvMatrix);
 }
 
 

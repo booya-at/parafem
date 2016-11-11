@@ -1,4 +1,5 @@
 #include "nurbs.h"
+#include <iostream>
 
 namespace paraFEM{
 
@@ -22,7 +23,7 @@ std::function<double(double)> get_basis(int degree, int i, Eigen::VectorXi knots
         return [degree, i, knots](double t)
         {
             // The basis function for degree > 0 as per eq. 8
-            if (i == t == 0)
+            if (i == 0 and t == 0)
                 return 1.;
             double out = 0.;
             int t_this = knots[i];
@@ -40,8 +41,6 @@ std::function<double(double)> get_basis(int degree, int i, Eigen::VectorXi knots
             bottom = (t_horizon - t_next);
             if (bottom != 0)
                 out += top / bottom * get_basis(degree-1, i + 1, knots)(t);
-            if (bottom == top == 0)
-                out = 0;
             return out;
         };
     }
@@ -49,29 +48,42 @@ std::function<double(double)> get_basis(int degree, int i, Eigen::VectorXi knots
 
 
 std::function<double(double)> get_basis_derivative(int order, int degree, int i, Eigen::VectorXi knots)
-    // Return the derivation of the basis function """
+    // Return the derivation of the basis function
 {
     if (order == 1)
     {
         return [degree, i, knots](double t)
         {
             double out = 0;
-            out +=  get_basis(degree - 1, i, knots)(t) *
-                    degree / (knots[i + degree] - knots[i]);
-            out -=  get_basis(degree - 1, i + 1, knots)(t) *
-                    degree / (knots[i + degree + 1] - knots[i + 1]);
-            return out;
+            if (not knots[i + degree] - knots[i] == 0)
+            {
+                out +=  get_basis(degree - 1, i, knots)(t) *
+                        degree / (knots[i + degree] - knots[i]);
+            }
+            if (not knots[i + degree + 1] - knots[i + 1] == 0)
+            {
+                out -=  get_basis(degree - 1, i + 1, knots)(t) *
+                        degree / (knots[i + degree + 1] - knots[i + 1]);
+            }
+            return out; 
         };
     }
     else
-    {   return [degree, i, knots, order](double t)
+    {   
+        return [degree, i, knots, order](double t)
         {
             double out = 0;
-            out +=  get_basis_derivative(order, degree - 1, i, knots)(t) *
-                    degree / (knots[i + degree] - knots[i]);
-            out -=  get_basis_derivative(order, degree - 1, i + 1, knots)(t) *
-                    degree / (knots[i + degree + 1] - knots[i + 1]);
-            return out;
+            if (not knots[i + degree] - knots[i] == 0)
+            {
+                out +=  get_basis_derivative(order - 1, degree - 1, i, knots)(t) *
+                        degree / (knots[i + degree] - knots[i]);
+            }
+            if (not knots[i + degree + 1] - knots[i + 1] == 0)
+            {
+                out -=  get_basis_derivative(order - 1, degree - 1, i + 1, knots)(t) *
+                        degree / (knots[i + degree + 1] - knots[i + 1]);
+            }
+            return out; 
         };
     }
 }
@@ -81,39 +93,43 @@ NurbsBase::NurbsBase(Eigen::VectorXi u_knots, Eigen::VectorXi v_knots,
                      Eigen::VectorXd weights,
                      int degree_u, int degree_v)
 {
-    assert(weights.size() == u_knots.size() * v_knots.size());
+    // assert(weights.size() == u_knots.size() * v_knots.size());
     this->u_knots = u_knots;
     this->v_knots = v_knots;
     this->weights = weights;
     this->degree_u = degree_u;
     this->degree_v = degree_v;
-    for (int u_i = 0; u_i < u_knots.size(); u_i ++)
+    for (int u_i = 0; u_i < u_knots.size() - degree_u - 1; u_i ++)
         this->u_functions.push_back(get_basis(degree_u, u_i, u_knots));
-    for (int v_i = 0; v_i < v_knots.size(); v_i ++)
-        this->u_functions.push_back(get_basis(degree_v, v_i, v_knots));
+    for (int v_i = 0; v_i < v_knots.size() - degree_v - 1; v_i ++)
+        this->v_functions.push_back(get_basis(degree_v, v_i, v_knots));
 }
 
 Eigen::VectorXd NurbsBase::getInfluenceVector(Eigen::Vector2d u)
 {
-    double n_u, n_v;
+    Eigen::VectorXd n_u, n_v;
     double sum_weights = 0;
     Eigen::VectorXd infl(this->u_functions.size() * this->v_functions.size());
     int i = 0;
     int u_i = 0;
     int v_i = 0;
-    for (auto foo_u: this->u_functions)
+
+    n_u.resize(this->u_functions.size());
+    n_v.resize(this->v_functions.size());
+
+    for (int i = 0; i < this->u_functions.size(); i ++)
+        n_u[i] = this->u_functions[i](u.x());
+    for (int i = 0; i < this->v_functions.size(); i ++)
+        n_v[i] = this->v_functions[i](u.y());
+
+    for (int u_i = 0; u_i < this->u_functions.size(); u_i++)
     {
-        n_u = foo_u(u.x());
-        v_i = 0;
-        for (auto foo_v: this->v_functions)
+        for (int v_i = 0; v_i < this->v_functions.size(); v_i++)
         {
-            n_v = foo_v(u.y());
-            sum_weights += weights[i] * n_u * n_v;
-            infl[i] = weights[i] * n_u * n_v;
+            sum_weights += weights[i] * n_u[u_i] * n_v[v_i];
+            infl[i] = weights[i] * n_u[u_i] * n_v[v_i];
             i ++;
-            v_i ++;
         }
-        u_i ++;
     }
     return infl / sum_weights;
 }
@@ -145,13 +161,13 @@ void NurbsBase::computeFirstDerivatives()
         this->Dv_functions.push_back(get_basis_derivative(1, this->degree_v, v_i, this->v_knots));
 }
 
-// void NurbsBase::computeSecondDerivatives()
-// {
-//     for (int u_i = 0; u_i < u_knots.size(); u_i ++)
-//         this->DDu_functions.push_back(get_basis_derivative(2, this->degree_u, u_i, this->u_knots));
-//     for (int v_i = 0; v_i < u_knots.size(); v_i ++)
-//         this->DDv_functions.push_back(get_basis_derivative(2, this->degree_v, v_i, this->v_knots));
-// }
+void NurbsBase::computeSecondDerivatives()
+{
+    for (int u_i = 0; u_i < u_knots.size(); u_i ++)
+        this->DDu_functions.push_back(get_basis_derivative(2, this->degree_u, u_i, this->u_knots));
+    for (int v_i = 0; v_i < u_knots.size(); v_i ++)
+        this->DDv_functions.push_back(get_basis_derivative(2, this->degree_v, v_i, this->v_knots));
+}
 
 Eigen::VectorXd NurbsBase::getDuVector(Eigen::Vector2d u)
 {
@@ -188,9 +204,7 @@ Eigen::VectorXd NurbsBase::getDuVector(Eigen::Vector2d u)
             A1[i] = C1; A2[i] = C1;
             A3 += C2; A5 += C1;
             i ++;
-            v_i ++;
         }
-        u_i ++;
     }
     return A1 / A3 - A2 * A5 / A3;
 }

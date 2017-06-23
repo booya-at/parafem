@@ -4,6 +4,7 @@
 #include "base.h"
 #include "Eigen/Geometry"
 #include <memory>
+#include <vector>
 
 
 namespace paraFEM

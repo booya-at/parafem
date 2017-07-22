@@ -43,27 +43,27 @@ void init_paraFEM(py::module &m){
         .def_readwrite("d_velocity", &paraFEM::Material::d_velocity)
         .def_readwrite("elasticity", &paraFEM::Material::elasticity);
     
-    py::class_<paraFEM::TrussMaterial, paraFEM::TrussMaterialPtr>(m, "TrussMaterial", py::base<paraFEM::Material>())
+    py::class_<paraFEM::TrussMaterial, paraFEM::TrussMaterialPtr, paraFEM::Material>(m, "TrussMaterial")
         .def(py::init<double>());
     
-    py::class_<paraFEM::MembraneMaterial, paraFEM::MembraneMaterialPtr>(m, "MembraneMaterial", py::base<paraFEM::Material>())
+    py::class_<paraFEM::MembraneMaterial, paraFEM::MembraneMaterialPtr, paraFEM::Material>(m, "MembraneMaterial")
         .def(py::init<double, double>());
 
     py::class_<paraFEM::Element, paraFEM::ElementPtr>(m, "__Element")
         .def("getStress", &paraFEM::Element::getStress)
         .def_readonly("nodes", &paraFEM::Element::nodes);
 
-    py::class_<paraFEM::Membrane, paraFEM::MembranePtr>(m, "__Membrane", py::base<paraFEM::Element>())
+    py::class_<paraFEM::Membrane, paraFEM::MembranePtr, paraFEM::Element>(m, "__Membrane")
         .def_readwrite("pressure", &paraFEM::Membrane::pressure)
         .def("setConstPressure", &paraFEM::Membrane::setConstPressure);
         
-    py::class_<paraFEM::Truss, paraFEM::TrussPtr> (m, "Truss", py::base<paraFEM::Element>())
+    py::class_<paraFEM::Truss, paraFEM::TrussPtr, paraFEM::Element> (m, "Truss")
         .def(py::init<std::vector<paraFEM::NodePtr>, paraFEM::TrussMaterialPtr>());
     
-    py::class_<paraFEM::Membrane3, paraFEM::Membrane3Ptr> (m, "Membrane3", py::base<paraFEM::Membrane>())
+    py::class_<paraFEM::Membrane3, paraFEM::Membrane3Ptr, paraFEM::Membrane> (m, "Membrane3")
         .def(py::init<std::vector<paraFEM::NodePtr>, paraFEM::MembraneMaterialPtr>());
       
-    py::class_<paraFEM::Membrane4, paraFEM::Membrane4Ptr> (m, "Membrane4", py::base<paraFEM::Membrane>())
+    py::class_<paraFEM::Membrane4, paraFEM::Membrane4Ptr, paraFEM::Membrane> (m, "Membrane4")
         .def(py::init<std::vector<paraFEM::NodePtr>, paraFEM::MembraneMaterialPtr>())
         .def(py::init<std::vector<paraFEM::NodePtr>, paraFEM::MembraneMaterialPtr, bool>());
 
@@ -98,8 +98,7 @@ void init_paraFEM(py::module &m){
 }
 
 
-PYBIND11_PLUGIN(_paraFEM){
-    py::module m("_paraFEM");
+py::module m("_paraFEM");
+PYBIND11_MODULE(_paraFEM, m){
     init_paraFEM(m);
-    return m.ptr();
 };

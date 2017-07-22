@@ -3,8 +3,6 @@ ADD_DEFINITIONS(-std=c++11)
 
 PROJECT(parafem)
 
-
-set(CMAKE_CXX_FLAGS "-O4")
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 # OPTIONS

@@ -97,8 +97,8 @@ void init_paraFEM(py::module &m){
         .def("getDvMatrix", &paraFEM::NurbsBase::getDvMatrix);
 }
 
-
-py::module m("_paraFEM");
-PYBIND11_MODULE(_paraFEM, m){
+PYBIND11_PLUGIN(_paraFEM){
+    py::module m("_paraFEM");
     init_paraFEM(m);
+    return m.ptr();
 };

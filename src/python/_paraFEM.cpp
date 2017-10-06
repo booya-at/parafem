@@ -71,30 +71,6 @@ void init_paraFEM(py::module &m){
         .def(py::init<std::vector<paraFEM::ElementPtr>>())
         .def("explicitStep", &paraFEM::FemCase::explicitStep, "make one explicit step",
             py::arg("h") = 0.0001, py::arg("externalFactor") = 1);
-
-    py::class_<paraFEM::LscmRelax>(m, "LscmRelax")
-        .def(py::init<std::vector<std::array<double, 3>>, std::vector<std::array<long, 3>>, std::vector<long>>())
-        .def(py::init<paraFEM::ColMat<double, 3>, paraFEM::ColMat<long, 3>, std::vector<long>>())
-        .def("lscm", &paraFEM::LscmRelax::lscm)
-        .def("relax", &paraFEM::LscmRelax::relax)
-        .def("rotate_by_min_bound_area", &paraFEM::LscmRelax::rotate_by_min_bound_area)
-        .def("transform", &paraFEM::LscmRelax::transform)
-        .def_readonly("rhs", &paraFEM::LscmRelax::rhs)
-        .def_readonly("MATRIX", &paraFEM::LscmRelax::MATRIX)
-        .def_property_readonly("area", &paraFEM::LscmRelax::get_area)
-        .def_property_readonly("flat_area", &paraFEM::LscmRelax::get_flat_area)
-        .def_property_readonly("flat_vertices", [](paraFEM::LscmRelax& L){return L.flat_vertices.transpose();}, py::return_value_policy::copy)
-        .def_property_readonly("flat_vertices_3D", &paraFEM::LscmRelax::get_flat_vertices_3D);
-
-    py::class_<paraFEM::NurbsBase>(m, "NurbsBase")
-        .def(py::init<Eigen::VectorXi, Eigen::VectorXi, Eigen::VectorXd, int, int>())
-        .def("computeFirstDerivatives", &paraFEM::NurbsBase::computeFirstDerivatives)
-        .def("getInfluenceVector", &paraFEM::NurbsBase::getInfluenceVector)
-        .def("getInfluenceMatrix", &paraFEM::NurbsBase::getInfluenceMatrix)
-        .def("getDuVector", &paraFEM::NurbsBase::getDuVector)
-        .def("getDuMatrix", &paraFEM::NurbsBase::getDuMatrix)
-        .def("getDvVector", &paraFEM::NurbsBase::getDvVector)
-        .def("getDvMatrix", &paraFEM::NurbsBase::getDvMatrix);
 }
 
 PYBIND11_PLUGIN(_paraFEM){

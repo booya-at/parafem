@@ -57,15 +57,15 @@ triangles = list(mesh.elements)
 
 # 4: fem mesh
 
-mat1 = fem.TrussMaterial(5)
+mat1 = fem.TrussMaterial(500)
 mat1.rho = 0.01
-mat1.d_structural = 0.000
+mat1.d_structural = 0.001
 mat1.d_velocity = 4
 
-mat2 = fem.MembraneMaterial(100, 0.4)
+mat2 = fem.MembraneMaterial(10000, 0.4)
 mat2.rho = 0.01
 mat2.d_structural = 0.000
-mat2.d_velocity = 10
+mat2.d_velocity = 30
 
 nodes = [fem.Node(point[0], point[1], 0) for point in mesh_points]
 elements = [fem.Membrane3([nodes[index] for index in tri], mat2) for tri in triangles]
@@ -93,15 +93,15 @@ case = fem.Case(elements + lines)
 writer = fem.vtkWriter("/tmp/paraFEM/profil_test")
 writer.writeCase(case, 0.0)
 
-steps = 3000
-steps_ramp = 100
+steps = 10000
+steps_ramp = 1
 
 line_forces = []
 
 for i in range(steps):
     ramp = 1 - (i < steps_ramp) * (1 - float(i) / steps_ramp)
-    case.explicitStep(1.40675e-05, ramp)
-    if (i % 10) == 0:
+    case.explicitStep(case.getExplicitMaxTimeStep()[0] / 2, ramp)
+    if (i % 500) == 0:
         print(i)
         line_forces.append([np.linalg.norm(l.getStress()) for l in lines])
         writer.writeCase(case, 0.)

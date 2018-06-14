@@ -15,22 +15,36 @@ FemCase::FemCase(std::vector<ElementPtr> elements,
 
 FemCase::FemCase(std::vector<ElementPtr> elements)
 {
-    double minTimeStep = 1;
-    double elTimeStep;
     for (auto element: elements)
     {
         for (auto node: element->nodes)
             this->nodes.insert(node);
         this->elements.push_back(element);
-        elTimeStep = element->characteristicLength / element->getMaterial()->waveSpeed();
-        if (elTimeStep < minTimeStep and elTimeStep != 0)
-            minTimeStep = elTimeStep;
     }
-    std::cout << "minTimeStep= " << minTimeStep << std::endl;
+    std::cout << "maxTimeStep= " << std::get<0>(this->getExplicitMaxTimeStep()) << std::endl;
     int count = 0;
     for (auto node: nodes)
         node->nr = count ++;
 }
+
+std::tuple<double, ElementPtr> FemCase::getExplicitMaxTimeStep()
+{
+
+    double maxTimeStep = 1;
+    double elTimeStep;
+    ElementPtr badElement;
+    for (auto element: this->elements)
+    {
+        elTimeStep = element->characteristicLength / element->getMaterial()->waveSpeed();
+        if (elTimeStep < maxTimeStep and elTimeStep != 0)
+        {
+            badElement = element;
+            maxTimeStep = elTimeStep;
+        }
+    }
+    return std::make_tuple(maxTimeStep, badElement);
+}
+
 
 void FemCase::explicitStep(double h, double externalFactor)
 {

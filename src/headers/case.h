@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <set>
+#include <tuple>
 
 #include "base.h"
 #include "node.h"
@@ -29,7 +30,7 @@ public:
     std::vector<PositionConstraintPtr> posConstraints;
     void explicitStep(double h, double externalFactor=1);
     void implicitStep(double h, double externalFactor=1);
-
+    std::tuple<double, ElementPtr> getExplicitMaxTimeStep();
     NodeVec get_nodes();
 
 };

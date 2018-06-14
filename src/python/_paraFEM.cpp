@@ -66,6 +66,7 @@ PYBIND11_PLUGIN(_paraFEM){
     py::class_<paraFEM::FemCase, paraFEM::FemCasePtr> (m, "Case")
         .def(py::init<std::vector<paraFEM::ElementPtr>>())
         .def("explicitStep", &paraFEM::FemCase::explicitStep, "make one explicit step",
-            py::arg("h") = 0.0001, py::arg("externalFactor") = 1);
+            py::arg("h") = 0.0001, py::arg("externalFactor") = 1)
+        .def("getExplicitMaxTimeStep", &paraFEM::FemCase::getExplicitMaxTimeStep, "cfl - value");
     return m.ptr();
 };

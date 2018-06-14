@@ -84,6 +84,9 @@ int main(int argc, char **argv) {
     // WRITER
     paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/paraFEM/membrane4_2/int0output");
 
+    stepsize = std::get<0>(c1->getExplicitMaxTimeStep());
+    stepsize /= 1.01;
+    interations = 5 / stepsize;
     // LOOP;
     for (int i=0; i<interations; i++)
     {

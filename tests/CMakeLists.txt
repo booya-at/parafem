@@ -23,7 +23,3 @@ target_link_libraries(membrane4_2 paraFEM vtkWriter)
 # scherspannungen
 add_executable(membrane4_3 membrane4_3.cpp)
 target_link_libraries(membrane4_3 paraFEM vtkWriter)
-
-# unwrap
-add_executable(unwrap_test unwrap_test.cpp)
-target_link_libraries(unwrap_test paraFEM vtkWriter)

@@ -21,36 +21,30 @@ The goal of this project is to have a working fem code supporting membrane and t
 
 ```python
 import paraFEM
-nodes = []
-elements = []
+import numpy as np
 
-mat1 = paraFEM.material.ripstop
-mat2 = paraFEM.material.lines
+mat = paraFEM.TrussMaterial(1000)
+mat.rho = 1
+mat.d_structural = 0.0
+mat.d_velocity = 1
 
-for point in mesh.points:
-    node = paraFEM.Node(*point)
-    node.setExternalForce(0, 100, 10)
-    node.setFixed(0, 0, 0)
-    nodes.append(node)
+node1 = paraFEM.Node(-1, 0, 0)
+node2 = paraFEM.Node(0, 0, 0)
+node3 = paraFEM.Node(1, 0, 0)
 
-for node_nr in mesh.elements:
-    element = paraFEM.Element(*node_nr)
-    element.setPressure(10, update=False)
-    element.material = mat1
-    element.writeStress = "scalar"  # or vector
-    element.groupTag = "groupa"
-    element.tag = "10"
-    elements.append(element)
+node1.fixed = np.array([0, 0, 0])
+node3.fixed = np.array([0, 0, 0])
+node2.add_external_force(np.array([0, 1, 0]))
 
-for hinge_nodes in mesh.hinges:
-    hinge = paraFEM.hinge(*hinge)
-    elemnts.append(hinge)
+truss1 = paraFEM.Truss([node1, node2], mat)
+truss2 = paraFEM.Truss([node2, node3], mat)
 
+case = paraFEM.Case([truss1, truss2])
 
-case = paraFEM.case(elements)
-case.store(100)
-case.maxU(0.0001)
-case.run(0, 10)
+writer = paraFEM.vtkWriter("/tmp/paraFEM/truss1_py/output")
 
-paraFEM.vtk.storeCase(case, "filename")
+for i in range(10000):
+    case.explicitStep(0.01)
+    if (i % 10) == 0:
+        writer.writeCase(case, 0.3)
 ```

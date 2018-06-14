@@ -12,18 +12,14 @@
 
 #include "vtkWriter.h"
 
-#include "unwrap.h"
-#include "nurbs.h"
-
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
 
 namespace py = pybind11;
 
-void init_paraFEM(py::module &m){
-    py::module::import("paraEigen");
-
+PYBIND11_PLUGIN(_paraFEM){
+    py::module m("_paraFEM");
     py::class_<paraFEM::VtkWriter, std::shared_ptr<paraFEM::VtkWriter>>(m, "vtkWriter")
         .def(py::init<const char*>())
         .def("writeCase", &paraFEM::VtkWriter::writeCase);
@@ -71,10 +67,5 @@ void init_paraFEM(py::module &m){
         .def(py::init<std::vector<paraFEM::ElementPtr>>())
         .def("explicitStep", &paraFEM::FemCase::explicitStep, "make one explicit step",
             py::arg("h") = 0.0001, py::arg("externalFactor") = 1);
-}
-
-PYBIND11_PLUGIN(_paraFEM){
-    py::module m("_paraFEM");
-    init_paraFEM(m);
     return m.ptr();
 };

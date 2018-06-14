@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
     nodes.back()->fixed = paraFEM::Vector3(0, 0, 0);
     paraFEM::FemCasePtr c (new paraFEM::FemCase(elements));
 
-    paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/paraFEM/truss2_");
+    paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/paraFEM/truss2/output");
     for (int i=0; i<2000; i++)
     {
         c->explicitStep(0.01);

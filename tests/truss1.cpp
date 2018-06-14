@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
     paraFEM::TrussPtr t1 (new paraFEM::Truss(paraFEM::NodeVec{n1, n2}, mat));
     paraFEM::TrussPtr t2 (new paraFEM::Truss(paraFEM::NodeVec{n2, n3}, mat));
     paraFEM::FemCasePtr c1 (new paraFEM::FemCase(paraFEM::ElementVec{t1, t2}));
-    paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/mytest/atest");
+    paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/paraFEM/truss1/output");
     for (int i=0; i<1000; i++)
     {
         c1->explicitStep(0.01);

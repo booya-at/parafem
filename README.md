@@ -11,11 +11,17 @@ The goal of this project is to have a working fem code supporting membrane and t
  - python binding with pybind11
  - make faster (fixed size arrays, ...)
 
-## results
+## tests and use-cases
 
+### pillow-test
+compare [klatsch-stange](https://pinsundmehr.de/wp-content/uploads/2017/08/klatschstangen-pum-01-bertrandt-ingenieur-dienstleister-02.jpg)
 <img src="./images/pillow.png" alt="result" width="400"/>
 
+### deformation of glider due to aerodynamic forces acting on mebran-elements
 <img src="./images/glider.png" alt="result" width="400"/>
+
+### computing line-forces. (forces have impact on line-geometry and line-lengths)
+<img src="./images/line-forces.png" alt="result" width="400"/>
 
 ## python bindings:
 

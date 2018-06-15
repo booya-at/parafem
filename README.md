@@ -54,3 +54,8 @@ for i in range(10000):
     if (i % 10) == 0:
         writer.writeCase(case, 0.3)
 ```
+
+
+## TODO:
+
+- line-forces can be computed with a simplified geometry. Using a __implicit integration__ will make the computation faster.

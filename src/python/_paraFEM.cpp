@@ -18,8 +18,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_PLUGIN(_paraFEM){
-    py::module m("_paraFEM");
+PYBIND11_MODULE(_paraFEM, m){
     py::class_<paraFEM::VtkWriter, std::shared_ptr<paraFEM::VtkWriter>>(m, "vtkWriter")
         .def(py::init<const char*>())
         .def("writeCase", &paraFEM::VtkWriter::writeCase);
@@ -68,5 +67,4 @@ PYBIND11_PLUGIN(_paraFEM){
         .def("explicitStep", &paraFEM::FemCase::explicitStep, "make one explicit step",
             py::arg("h") = 0.0001, py::arg("externalFactor") = 1)
         .def("getExplicitMaxTimeStep", &paraFEM::FemCase::getExplicitMaxTimeStep, "cfl - value");
-    return m.ptr();
 };

@@ -14,7 +14,7 @@ set(CPP_FILES  ${CMAKE_SOURCE_DIR}/src/case.cpp
                ${CMAKE_SOURCE_DIR}/src/membrane.cpp
                ${CMAKE_SOURCE_DIR}/src/material.cpp)
 
-add_library(paraFEM SHARED ${CPP_FILES} ${HEADER_FILES})
+add_library(paraFEM STATIC ${CPP_FILES} ${HEADER_FILES})
 
 install(TARGETS paraFEM DESTINATION lib)
 

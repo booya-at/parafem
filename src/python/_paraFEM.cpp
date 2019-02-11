@@ -10,7 +10,9 @@
 #include "case.h"
 #include "material.h"
 
-#include "vtkWriter.h"
+#ifdef BUILD_VTK_WRITER
+    #include "vtkWriter.h"
+#endif
 
 
 // PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
@@ -19,9 +21,11 @@
 namespace py = pybind11;
 
 PYBIND11_MODULE(_paraFEM, m){
-    py::class_<paraFEM::VtkWriter, std::shared_ptr<paraFEM::VtkWriter>>(m, "vtkWriter")
-        .def(py::init<const char*>())
-        .def("writeCase", &paraFEM::VtkWriter::writeCase);
+    #ifdef BUILD_VTK_WRITER
+        py::class_<paraFEM::VtkWriter, std::shared_ptr<paraFEM::VtkWriter>>(m, "vtkWriter")
+            .def(py::init<const char*>())
+            .def("writeCase", &paraFEM::VtkWriter::writeCase);
+    #endif
 
     py::class_<paraFEM::Node, paraFEM::NodePtr> (m, "Node")
         .def(py::init<double, double, double>())

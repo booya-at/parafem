@@ -23,3 +23,16 @@ target_link_libraries(membrane4_2 paraFEM vtkWriter)
 # scherspannungen
 add_executable(membrane4_3 membrane4_3.cpp)
 target_link_libraries(membrane4_3 paraFEM vtkWriter)
+
+
+set(TESTS
+	truss1
+	truss2
+	membrane3_1
+	membrane3_2
+	membrane4_1
+	membrane4_2
+	membrane4_3
+)
+
+install(TARGETS ${TESTS} DESTINATION share/paraFEM/tests)

@@ -31,9 +31,13 @@ int VtkWriter::writeCase(paraFEM::FemCasePtr c, double coordSysSize)
     vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();  // truss elements
     vtkSmartPointer<vtkFloatArray> cellData = vtkSmartPointer<vtkFloatArray>::New();  // truss forces
     vtkSmartPointer<vtkCellArray> polygons = vtkSmartPointer<vtkCellArray>::New();  // polygons elements (t3/t4)
+    vtkSmartPointer<vtkFloatArray> pressure = vtkSmartPointer<vtkFloatArray>::New();  // pressure
     
     cellData->SetNumberOfComponents(3);
     cellData->SetName("stress");
+
+    pressure->SetNumberOfComponents(1);
+    pressure->SetName("pressure");
     
     std::vector<paraFEM::TrussPtr> truss_elements;
     std::vector<paraFEM::MembranePtr> membrane_elements;
@@ -74,6 +78,7 @@ int VtkWriter::writeCase(paraFEM::FemCasePtr c, double coordSysSize)
                     lines->InsertNextCell(line);
                     
                     cellData->InsertNextTuple3(0, 0, 0);
+                    pressure->InsertNextValue(0);
                 }
                 counter += 4;
             }
@@ -98,6 +103,7 @@ int VtkWriter::writeCase(paraFEM::FemCasePtr c, double coordSysSize)
             lines->InsertNextCell(line);
             paraFEM::Vector3 stress = element->getStress();
             cellData->InsertNextTuple3(stress.x(), stress.y(), stress.z());  //scalar
+            pressure->InsertNextValue(0);
         }
     }
 
@@ -113,13 +119,17 @@ int VtkWriter::writeCase(paraFEM::FemCasePtr c, double coordSysSize)
             polygons->InsertNextCell(polygon);
             paraFEM::Vector3 stress = element->getStress();
             cellData->InsertNextTuple3(stress.x(), stress.y(), stress.z());
+            pressure->InsertNextValue(element->pressure);
         }
     }
 
     polydata->SetPoints(points);
     polydata->SetLines(lines);
     polydata->SetPolys(polygons);
+    //polydata->GetCellData()->SetActiveScalars('st');
     polydata->GetCellData()->SetScalars(cellData);
+    //polydata->GetCellData()->SetActiveScalars('pr');
+    polydata->GetCellData()->SetVectors(pressure);
 
     writer->SetFileName((file_name + to_string(count) + string(".vtk")).c_str());
     writer->SetInputData(polydata);

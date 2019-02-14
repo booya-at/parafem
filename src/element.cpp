@@ -8,51 +8,67 @@ CoordSys::CoordSys(Vector3 n_vec)
 {
     check_nan(n_vec, "CoordSys:n");
     this->n = n_vec;
-    t1 = Vector3(1, 0, 0);
-    if (n == t1)
-        t1 = Vector3(0, 1, 0);
-    t2 = n.cross(t1);
-    t1 = t2.cross(n);
-    n.normalize();
-    t1.normalize();
-    t2.normalize();
-    mat.row(0) = t1;
-    mat.row(1) = t2;
+    this->n.normalize();
+    this->t1 = Vector3(1, 0, 0);
+    if (this->n.dot(this->t1) > 0.9){
+        this->t1 = Vector3(0, 1, 0);
+    }
+    this->t2 = n.cross(t1);
+    this->t1 = t2.cross(n);
+
+    this->t1.normalize();
+    this->t2.normalize();
+    this->mat.row(0) = t1;
+    this->mat.row(1) = t2;
+    check_nan(this->t1, "CoordSys:t1");
+    check_nan(this->t2, "CoordSys:t2");
 }
 
 CoordSys::CoordSys(Vector3 n_vec, Vector3 t1_vec)
 {
     check_nan(n_vec, "CoordSys:n");
-    n = n_vec;
-    t2 = n.cross(t1_vec);
-    t1 = t2.cross(n);
-    n.normalize();
-    t1.normalize();
-    t2.normalize();
-    mat.row(0) = t1;
-    mat.row(1) = t2;
+    this->n = n_vec;
+    this->n.normalize();
+
+    this->t2 = n.cross(t1_vec);
+    this->t1 = t2.cross(n);
+    this->t1.normalize();
+    this->t2.normalize();
+    this->mat.row(0) = t1;
+    this->mat.row(1) = t2;
+    check_nan(this->t1, "CoordSys:t1");
+    check_nan(this->t2, "CoordSys:t2");
 }
 
 void CoordSys::update(Vector3 n_vec)
 {
+    this->update(n_vec, this->t1);
     check_nan(n_vec, "CoordSys:n:update");
-    n = n_vec;
-    n.normalize();
-    t2 = n.cross(t1);
-    t2.normalize();
-    t1 = t2.cross(n);
-    mat.row(0) = t1;
-    mat.row(1) = t2;
+    this->n = n_vec;
+    this->n.normalize();
+    this->t2 = n.cross(t1);
+    this->t2.normalize();
+    this->t1 = t2.cross(n);
+    this->t1.normalize();
+    this->mat.row(0) = t1;
+    this->mat.row(1) = t2;
+    check_nan(this->t1, "CoordSys:t1:update");
+    check_nan(this->t2, "CoordSys:t2:update");
 }
 
 void CoordSys::update(Vector3 n_vec, Vector3 t1_vec)
 {
     check_nan(n_vec, "CoordSys:n:update");
-    n = n_vec; n.normalize();
-    t1 = t1_vec; t1.normalize();
-    t2 = n.cross(t1);
-    mat.row(0) = t1;
-    mat.row(1) = t2;
+    this->n = n_vec;
+    this->n.normalize();
+    this->t1 = t1_vec;
+    this->t1.normalize();
+    this->t2 = n.cross(t1);
+    this->t2.normalize();
+    this->mat.row(0) = t1;
+    this->mat.row(1) = t2;
+    check_nan(this->t1, "CoordSys:t1:update");
+    check_nan(this->t2, "CoordSys:t2:update");
 }
 
 void CoordSys::rotate(std::vector< Vector2 > first, std::vector< Vector2 > second)
@@ -61,6 +77,8 @@ void CoordSys::rotate(std::vector< Vector2 > first, std::vector< Vector2 > secon
    mat = rot.transpose() * mat;   //rot.T?
    t1 = mat.row(0);
    t2 = mat.row(1);
+    check_nan(this->t1, "CoordSys:t1:rotate");
+    check_nan(this->t2, "CoordSys:t2:rotate");
 }
 
 void CoordSys::rotate(Eigen::MatrixX2d first, Eigen::MatrixX2d second)
@@ -69,6 +87,8 @@ void CoordSys::rotate(Eigen::MatrixX2d first, Eigen::MatrixX2d second)
    mat = rot.transpose() * mat;   //rot.T?
    t1 = mat.row(0);
    t2 = mat.row(1);
+    check_nan(this->t1, "CoordSys:t1:rotate");
+    check_nan(this->t2, "CoordSys:t2:rotate");
 }
 
 
@@ -83,6 +103,7 @@ Vector3 CoordSys::toGlobal(Vector2 vec)
     Vector3 result = mat.transpose() * vec;
     if (is_nan(result)) {
         std::cout << "Error" << this->mat << "//" << vec << "->" << result << std::endl;
+        std::cout << "N" << this->n << "//t1" << this->t1 << "//t2: " << this->t2 << std::endl;
     }
     check_nan(result, "CoordSys::toGlobal");
 

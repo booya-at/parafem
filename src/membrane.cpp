@@ -1,7 +1,6 @@
 #include "element.h"
 #include <iostream>
 
-
 namespace paraFEM {
 
 void Membrane::setConstPressure(double p)
@@ -68,30 +67,34 @@ Membrane3::Membrane3(std::vector<NodePtr> points, std::shared_ptr<MembraneMateri
 
 void Membrane3::explicitStep(double h)
 {
-    if (not is_valid)
+    double step_size = h;
+    if (not this->is_valid)
         return;
 
     // 0: properties
     center.setZero();
     
     //      find new center
-    for (auto node: nodes)
-        center += node->position;
-    center /= nodes.size();
+    for (auto node: this->nodes)
+    {
+        this->center += node->position;
+    }
+
+    this->center /= nodes.size();
     
     // 1: new coordSys
     //      compute the new normal of the element and update the coordinate system
-    Vector3 n = (nodes[1]->position - nodes[0]->position).cross(
-                 nodes[2]->position - nodes[1]->position);
-    area = n.norm() / 2.;
-    coordSys.update(n / area / 2, nodes[1]->position - nodes[0]->position);
+    Vector3 n = (this->nodes[1]->position - this->nodes[0]->position).cross(
+                 this->nodes[2]->position - this->nodes[1]->position);
+    this->area = n.norm() / 2.;
+    this->coordSys.update(n / area / 2, this->nodes[1]->position - this->nodes[0]->position);
 
     //      get the local position for the updated coordinate system
     Eigen::Matrix<double, 3, 2> new_pos_mat;
     int row_count = 0;
-    for (auto node: nodes)
+    for (auto node: this->nodes)
     {
-        new_pos_mat.row(row_count) = coordSys.toLocal(node->position - center);
+        new_pos_mat.row(row_count) = this->coordSys.toLocal(node->position - this->center);
         row_count ++;
     }
     
@@ -101,55 +104,66 @@ void Membrane3::explicitStep(double h)
     row_count = 0;
     for (auto node: nodes)
     {
-        pos_mat.row(row_count) = coordSys.toLocal(node->position - center);
-        vel_mat.row(row_count) = coordSys.toLocal(node->velocity);
+        this->pos_mat.row(row_count) = coordSys.toLocal(node->position - center);
+        this->vel_mat.row(row_count) = coordSys.toLocal(node->velocity);
         row_count ++;
     }
 
     // 2: B-matrix
-    dN << -1, 1, 0,
-          -1, 0, 1;
-    B = (dN * pos_mat).inverse() * dN;
+    this->dN << -1, 1, 0,
+                -1, 0, 1;
+    this->B = (this->dN * this->pos_mat).inverse() * this->dN;
 
     // 3: strain rate  //? local_velocity as matrix ?
     Vector3 strain_rate;
     strain_rate.setZero();
     for (int i = 0; i < nodes.size(); i++)
     {
-        strain_rate += Vector3(B(0,i) * vel_mat(i, 0),
-                               B(1,i) * vel_mat(i, 1),
-                               B(0,i) * vel_mat(i, 1) +
-                               B(1,i) * vel_mat(i, 0));
+        strain_rate += Vector3(this->B(0,i) * this->vel_mat(i, 0),
+                               this->B(1,i) * this->vel_mat(i, 1),
+                               this->B(0,i) * this->vel_mat(i, 1) +
+                               this->B(1,i) * this->vel_mat(i, 0));
     }
 
     // 4: stress rate (hook) ->material,...
     Vector3 stress_rate;
-    stress_rate = material->C * strain_rate;
+    stress_rate = this->material->C * strain_rate;
+
+    for (int i=0; i<3; i++) {
+        if (!(stress_rate(i)<1000)) {
+            std::cout << "Fehler" << stress_rate << std::endl;
+            std::cout << "Fehler2" << strain_rate << std::endl;
+            std::cout << "Fehler3" << this->material->C << std::endl;
+        }
+    }
     
     // 5: integrate stress_rate (time, area)
-    stress += h * stress_rate;
-    Vector3 local_force =  stress * area;
-    Vector3 structural_damping = material->d_structural * stress_rate * area;
+    stress += step_size * stress_rate;
+    Vector3 local_force =  stress * this->area;
+    Vector3 structural_damping = this->material->d_structural * stress_rate * this->area;
+
     Vector3 hydrostatic_damping = Vector3(1, 1, 0);
-    hydrostatic_damping *= dViscous * (strain_rate.x() + strain_rate.y());
+    hydrostatic_damping *= this->dViscous * (strain_rate.x() + strain_rate.y());
     
     // 6: nodal forces with virtual power
     // T.T * B.T * stress
     Vector2 local_node_force;
     
-    for (int i = 0; i < nodes.size(); i++)
+    for (int i = 0; i < this->nodes.size(); i++)
     {
         local_node_force.setZero();
-        local_node_force.x() += B(0, i) * (local_force(0) + structural_damping(0) + hydrostatic_damping(0))
-                             +  B(1, i) * (local_force(2) + structural_damping(2));
-        local_node_force.y() += B(1, i) * (local_force(1) + structural_damping(1) + hydrostatic_damping(1))
-                             +  B(0, i) * (local_force(2) + structural_damping(2));
-        nodes[i]->internalForce += coordSys.toGlobal(local_node_force);
+        local_node_force.x() += this->B(0, i) * (local_force(0) + structural_damping(0) + hydrostatic_damping(0))
+                             +  this->B(1, i) * (local_force(2) + structural_damping(2));
+        local_node_force.y() += this->B(1, i) * (local_force(1) + structural_damping(1) + hydrostatic_damping(1))
+                             +  this->B(0, i) * (local_force(2) + structural_damping(2));
+        this->nodes[i]->internalForce += this->coordSys.toGlobal(local_node_force);
     }
-    for (auto node: nodes)
+    Vector3 force_cp = this->pressure / nodes.size() * this->coordSys.n;
+    double damping = this->material->d_velocity * this->area / this->nodes.size();
+    for (auto node: this->nodes)
     {
-        node->internalForce -= pressure / nodes.size() * this->coordSys.n;
-        node->internalForce += node->velocity * material->d_velocity * area / nodes.size();
+        node->internalForce -= force_cp;
+        node->internalForce += node->velocity * damping;
     }
     
 }
@@ -236,7 +250,9 @@ void Membrane4::initHG()
 }
     
 void Membrane4::explicitStep(double h)
-{    // 0: properties
+{
+    double step_size = h;
+    // 0: properties
     if (not is_valid)
         return;
     center.setZero();
@@ -301,7 +317,7 @@ void Membrane4::explicitStep(double h)
         stress_rate = material->C * strain_rate;
 
         // 5: integrate sigma
-        int_point.stress += h * stress_rate;
+        int_point.stress += step_size * stress_rate;
         Vector3 local_force = int_point.stress * area;
         Vector3 structural_damping = material->d_structural * strain_rate * area;
         Vector3 hydrostatic_damping = Vector3(1, 1, 0);
@@ -331,7 +347,7 @@ void Membrane4::explicitStep(double h)
     if (integration_points.size() == 1)
     {
         //      hourglass stressrate + integration
-        hg_stress += hg_const * (vel_mat.transpose() * hg_gamma) * h;
+        hg_stress += hg_const * (vel_mat.transpose() * hg_gamma) * step_size;
         for (int i = 0; i < nodes.size(); i++)
         {
             local_node_force.setZero();

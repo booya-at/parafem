@@ -51,16 +51,16 @@ void FemCase::explicitStep(double h, double externalFactor)
     time += h;
     auto node_cp = this->get_nodes();
 
-// for with iterator
-#pragma omp parallel for
+    // for with iterator
+    #pragma omp parallel for
     for(int i = 0; i < elements.size(); i++)
     {
         auto element = elements[i];
         element->explicitStep(h);  // computing the internal forces
     }
 
-// for with iterator
-#pragma omp parallel for
+    // for with iterator
+    #pragma omp parallel for
     for(int j = 0; j < node_cp.size(); j++)
     {
         auto node = node_cp[j];

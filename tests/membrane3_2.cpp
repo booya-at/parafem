@@ -71,8 +71,8 @@ int main(int argc, char **argv) {
                     paraFEM::NodeVec{grid[pos4], grid[pos3], grid[pos1]}, mat);
             m2 = std::make_shared<paraFEM::Membrane3>(
                     paraFEM::NodeVec{grid[pos2], grid[pos1], grid[pos3]}, mat);
-            m1->setConstPressure(pressure);
-            m2->setConstPressure(pressure);
+            m1->pressure = pressure;
+            m2->pressure = pressure;
             elements.push_back(m1);
             elements.push_back(m2);
         }

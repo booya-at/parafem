@@ -1,16 +1,8 @@
 #include "element.h"
 #include <iostream>
+#include "utils.h"
 
 namespace paraFEM {
-
-void Membrane::setConstPressure(double p)
-{
-    for (auto node: nodes)
-    {
-        node->externalForce += coordSys.n * area * p / nodes.size();
-    }
-}
-
 
 MaterialPtr Membrane::getMaterial()
 {
@@ -21,28 +13,27 @@ MaterialPtr Membrane::getMaterial()
     
 Membrane3::Membrane3(std::vector<NodePtr> points, std::shared_ptr<MembraneMaterial> mat)
 {
-    nodes = points;
-    material = mat;
-    center.setZero();
+    this->nodes = points;
+    this->material = mat;
+    this->pressure = 0;
+    this->center.setZero();
     for (auto node: nodes)
-        center += node->position;
-    center /= nodes.size();
+        this->center += node->position;
+    this->center /= nodes.size();
     Vector3 n = (nodes[1]->position - nodes[0]->position).cross(
                          nodes[2]->position - nodes[1]->position);
-    area = n.norm() / 2;
-    if (area == 0)
+    this->area = n.norm() / 2;
+    if (this->area == 0 || std::isnan(this->area))
     {
-        std::cout << "warning area 0" << std::endl;
+
+        std::cout << "warning area " << this->area << std::endl;
         for (auto node: nodes)
         {
             std::cout << node->position << std::endl;
         }
-
-
-        is_valid = false;
-        return;
+        throw FemException("Zero-Area membrane");
     }
-    coordSys = CoordSys(n / area / 2., nodes[1]->position - nodes[0]->position);
+    this->coordSys = CoordSys(n / area / 2., nodes[1]->position - nodes[0]->position);
     int row_count = 0;
     for (auto node: nodes)
     {
@@ -87,6 +78,7 @@ void Membrane3::explicitStep(double h)
     Vector3 n = (this->nodes[1]->position - this->nodes[0]->position).cross(
                  this->nodes[2]->position - this->nodes[1]->position);
     this->area = n.norm() / 2.;
+    check_nan(n, "Membrane3::explicitStep:n");
     this->coordSys.update(n / area / 2, this->nodes[1]->position - this->nodes[0]->position);
 
     //      get the local position for the updated coordinate system
@@ -164,7 +156,10 @@ void Membrane3::explicitStep(double h)
     {
         node->internalForce -= force_cp;
         node->internalForce += node->velocity * damping;
+
+        check_nan(node->internalForce, "membrane3:explicitstep:node_internal_force");
     }
+
     
 }
 
@@ -179,8 +174,9 @@ Membrane4::Membrane4(std::vector<NodePtr> points,
                      bool reduced_integration)
 {
     
-    material = mat;
-    nodes = points;
+    this->material = mat;
+    this->nodes = points;
+    this->pressure = 0;
     for (auto node: nodes)
         center += node->position;
     center /= nodes.size();
@@ -267,6 +263,7 @@ void Membrane4::explicitStep(double h)
     Vector3 n = (nodes[2]->position - nodes[0]->position).cross(
                  nodes[3]->position - nodes[1]->position);
     area = n.norm() / 2.;
+    check_nan(n, "Membrane3::explicitStep:n");
     coordSys.update(n / area / 2.);
 
     //      get the local position for the updated coordinate system
@@ -296,6 +293,9 @@ void Membrane4::explicitStep(double h)
     Vector3 strain_rate;
     Vector3 stress_rate;
     Vector2 local_node_force;
+    for (auto node: this->nodes) {
+        check_nan(node->internalForce, "membrane4:explicitstep:node_internal_force0");
+    }
 
     for (IntegrationPoint& int_point: integration_points)
     {
@@ -336,13 +336,19 @@ void Membrane4::explicitStep(double h)
             }
 
     }
-    
+
+    for (auto node: this->nodes) {
+        check_nan(node->internalForce, "membrane4:explicitstep:node_internal_force1");
+    }
     for (auto node: nodes)
     {
         node->internalForce -= pressure / nodes.size() * this->coordSys.n;
         node->internalForce += node->velocity * material->d_velocity * area / nodes.size();
     }
-        
+
+    for (auto node: this->nodes) {
+        check_nan(node->internalForce, "membrane4:explicitstep:node_internal_force2");
+    }
     // 7: hourglasscontrol
     if (integration_points.size() == 1)
     {
@@ -355,6 +361,10 @@ void Membrane4::explicitStep(double h)
             local_node_force.y() += hg_gamma[i] * hg_stress.y();
             nodes[i]->internalForce += coordSys.toGlobal(local_node_force);
         }
+    }
+
+    for (auto node: this->nodes) {
+        check_nan(node->internalForce, "membrane4:explicitstep:node_internal_force3");
     }
 }
 

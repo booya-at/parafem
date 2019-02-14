@@ -3,6 +3,7 @@
 
 #include "base.h"
 #include "node.h"
+#include "utils.h"
 #include "material.h"
 #include "Eigen/Geometry"
 #include <Eigen/IterativeLinearSolvers>
@@ -89,7 +90,6 @@ struct Membrane: public Element
     CoordSys coordSys;
     double area;
     double pressure;                 // pressure acting on internal forces
-    void setConstPressure(double);
     
     std::shared_ptr<MembraneMaterial> material;
     MaterialPtr getMaterial();

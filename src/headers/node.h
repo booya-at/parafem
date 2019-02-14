@@ -2,6 +2,7 @@
 #define NODE_H
 
 #include "base.h"
+#include "utils.h"
 #include "Eigen/Geometry"
 #include <memory>
 #include <vector>
@@ -10,8 +11,6 @@
 namespace paraFEM
 {
 
-typedef Eigen::Vector3d Vector3;
-typedef Eigen::Vector2d Vector2;
     
 struct Node: Base
 {

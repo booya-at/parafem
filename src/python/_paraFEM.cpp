@@ -53,8 +53,7 @@ PYBIND11_MODULE(_paraFEM, m){
         .def_readonly("nodes", &paraFEM::Element::nodes);
 
     py::class_<paraFEM::Membrane, paraFEM::MembranePtr, paraFEM::Element>(m, "__Membrane")
-        .def_readwrite("pressure", &paraFEM::Membrane::pressure)
-        .def("setConstPressure", &paraFEM::Membrane::setConstPressure);
+        .def_readwrite("pressure", &paraFEM::Membrane::pressure);
         
     py::class_<paraFEM::Truss, paraFEM::TrussPtr, paraFEM::Element> (m, "Truss")
         .def(py::init<std::vector<paraFEM::NodePtr>, paraFEM::TrussMaterialPtr>());

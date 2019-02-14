@@ -1,10 +1,13 @@
 #include "element.h"
+#include "utils.h"
+#include <iostream>
 
 namespace paraFEM {
     
 CoordSys::CoordSys(Vector3 n_vec)
 {
-    n = n_vec;
+    check_nan(n_vec, "CoordSys:n");
+    this->n = n_vec;
     t1 = Vector3(1, 0, 0);
     if (n == t1)
         t1 = Vector3(0, 1, 0);
@@ -19,6 +22,7 @@ CoordSys::CoordSys(Vector3 n_vec)
 
 CoordSys::CoordSys(Vector3 n_vec, Vector3 t1_vec)
 {
+    check_nan(n_vec, "CoordSys:n");
     n = n_vec;
     t2 = n.cross(t1_vec);
     t1 = t2.cross(n);
@@ -31,6 +35,7 @@ CoordSys::CoordSys(Vector3 n_vec, Vector3 t1_vec)
 
 void CoordSys::update(Vector3 n_vec)
 {
+    check_nan(n_vec, "CoordSys:n:update");
     n = n_vec;
     n.normalize();
     t2 = n.cross(t1);
@@ -42,6 +47,7 @@ void CoordSys::update(Vector3 n_vec)
 
 void CoordSys::update(Vector3 n_vec, Vector3 t1_vec)
 {
+    check_nan(n_vec, "CoordSys:n:update");
     n = n_vec; n.normalize();
     t1 = t1_vec; t1.normalize();
     t2 = n.cross(t1);
@@ -74,7 +80,13 @@ Vector2 CoordSys::toLocal(Vector3 vec)
 
 Vector3 CoordSys::toGlobal(Vector2 vec)
 {
-    return mat.transpose() * vec;
+    Vector3 result = mat.transpose() * vec;
+    if (is_nan(result)) {
+        std::cout << "Error" << this->mat << "//" << vec << "->" << result << std::endl;
+    }
+    check_nan(result, "CoordSys::toGlobal");
+
+    return result;
 }
 
 

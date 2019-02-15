@@ -1,5 +1,6 @@
 #include "vtkWriter.h"
 #include "node.h"
+#include "utils.h"
 
 
 #include <vtkSmartPointer.h>

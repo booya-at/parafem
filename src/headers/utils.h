@@ -16,6 +16,7 @@ private:
     std::string message = "";
 };
 
+bool is_finite(const Vector3 &x) ;
 
 bool is_nan(const Vector3 &x);
 

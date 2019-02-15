@@ -1,5 +1,4 @@
 #include "element.h"
-#include "utils.h"
 #include <iostream>
 
 namespace paraFEM {

@@ -3,11 +3,11 @@
 namespace paraFEM {
 
 
-inline bool is_finite(const Vector3 &x) {
+bool is_finite(const Vector3 &x) {
     return ( (x - x).array() == (x - x).array()).all();
 }
 
-inline bool is_nan(const Vector3 &x){
+bool is_nan(const Vector3 &x){
     return !is_finite(x);
 }
 

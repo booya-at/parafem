@@ -30,6 +30,7 @@ public:
     std::vector<PositionConstraintPtr> posConstraints;
     void explicitStep(double h, double externalFactor=1);
     void implicitStep(double h, double externalFactor=1);
+    double getMaxVelocity();
     std::tuple<double, ElementPtr> getExplicitMaxTimeStep();
     NodeVec get_nodes();
 

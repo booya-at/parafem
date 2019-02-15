@@ -127,9 +127,9 @@ int VtkWriter::writeCase(paraFEM::FemCasePtr c, double coordSysSize)
     polydata->SetLines(lines);
     polydata->SetPolys(polygons);
     //polydata->GetCellData()->SetActiveScalars('st');
-    polydata->GetCellData()->SetScalars(cellData);
+    polydata->GetCellData()->SetVectors(cellData);
     //polydata->GetCellData()->SetActiveScalars('pr');
-    polydata->GetCellData()->SetVectors(pressure);
+    polydata->GetCellData()->SetScalars(pressure);
 
     writer->SetFileName((file_name + to_string(count) + string(".vtk")).c_str());
     writer->SetInputData(polydata);

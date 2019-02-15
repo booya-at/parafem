@@ -1,6 +1,6 @@
 #include "case.h"
 #include <iostream>
-
+#include <algorithm>    // std::max
 #include "omp.h"
 
 namespace paraFEM {
@@ -45,11 +45,24 @@ std::tuple<double, ElementPtr> FemCase::getExplicitMaxTimeStep()
     return std::make_tuple(maxTimeStep, badElement);
 }
 
+double FemCase::getMaxVelocity() {
+    double velocity = 0;
+    for (auto node: this->get_nodes()) {
+        velocity = std::max(velocity, node->velocity.norm());
+    }
+    return velocity;
+}
+
 
 void FemCase::explicitStep(double h, double externalFactor)
 {
     time += h;
     auto node_cp = this->get_nodes();
+
+    for (int i=0; i<this->elements.size(); i++) {
+        auto element = elements[i];
+        element->geometryStep();
+    }
 
     for(int i = 0; i < elements.size(); i++)
     {

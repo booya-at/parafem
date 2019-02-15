@@ -50,6 +50,7 @@ struct IntegrationPoint: Base
 struct Element: Base
 {
     std::vector<NodePtr> nodes;
+    virtual void geometryStep() = 0;
     virtual void explicitStep(double h) = 0;  // compute the internal forces acting on the nodes.
     // virtual void implicitStep(double h) = 0;
     std::vector<int> getNr();
@@ -68,6 +69,7 @@ struct Truss: public Element
     Truss(const std::vector<NodePtr>, std::shared_ptr<TrussMaterial>);
     virtual Vector3 getStress();
     double stress;           // at timestep n
+    virtual void geometryStep();
     virtual void explicitStep(double h);
     virtual void implicitStep(std::vector<trip> & Kt);
     std::shared_ptr<TrussMaterial> material;
@@ -79,6 +81,7 @@ struct LineJoint: public Element
 {
 // elment that connects nodes that are not exactly matching
     LineJoint(const std::vector<NodePtr>, std::shared_ptr<TrussMaterial>);
+    virtual void geometryStep();
     virtual void explicitStep(double h);
     virtual Vector3 getStress();
     std::shared_ptr<TrussMaterial> material;
@@ -90,6 +93,8 @@ struct Membrane: public Element
     CoordSys coordSys;
     double area;
     double pressure;                 // pressure acting on internal forces
+
+    Vector3 calculate_center();
     
     std::shared_ptr<MembraneMaterial> material;
     MaterialPtr getMaterial();
@@ -98,6 +103,7 @@ struct Membrane: public Element
 struct Membrane3: public Membrane
 {
     Membrane3(const std::vector<NodePtr>, std::shared_ptr<MembraneMaterial>);
+    virtual void geometryStep();
     virtual void explicitStep(double h);
     Vector3 stress;
     virtual Vector3 getStress();
@@ -110,6 +116,7 @@ struct Membrane4: public  Membrane
 {
     Membrane4(const std::vector<NodePtr>, std::shared_ptr<MembraneMaterial>, bool reduced_integration=true);
     std::vector<IntegrationPoint> integration_points;  //eta, zeta, weight, stress
+    virtual void geometryStep();
     virtual void explicitStep(double h);
     
     // hourglass control

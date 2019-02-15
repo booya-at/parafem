@@ -8,7 +8,19 @@ MaterialPtr Membrane::getMaterial()
 {
     return std::dynamic_pointer_cast<Material>(this->material);
 }
-    
+
+Vector3 Membrane::calculate_center() {
+    this->center.setZero();
+
+    //      find new center
+    for (auto node: this->nodes) {
+        this->center += node->position;
+    }
+    this->center /= this->nodes.size();
+
+    return this->center;
+
+}
     
     
 Membrane3::Membrane3(std::vector<NodePtr> points, std::shared_ptr<MembraneMaterial> mat)
@@ -16,10 +28,8 @@ Membrane3::Membrane3(std::vector<NodePtr> points, std::shared_ptr<MembraneMateri
     this->nodes = points;
     this->material = mat;
     this->pressure = 0;
-    this->center.setZero();
-    for (auto node: nodes)
-        this->center += node->position;
-    this->center /= nodes.size();
+    this->calculate_center();
+
     Vector3 n = (nodes[1]->position - nodes[0]->position).cross(
                          nodes[2]->position - nodes[1]->position);
     this->area = n.norm() / 2;
@@ -56,23 +66,10 @@ Membrane3::Membrane3(std::vector<NodePtr> points, std::shared_ptr<MembraneMateri
     characteristicLength = smallestSide;
 }
 
-void Membrane3::explicitStep(double h)
-{
-    double step_size = h;
-    if (not this->is_valid)
-        return;
+void Membrane3::geometryStep() {
+    this->calculate_center();
 
-    // 0: properties
-    center.setZero();
-    
-    //      find new center
-    for (auto node: this->nodes)
-    {
-        this->center += node->position;
-    }
 
-    this->center /= nodes.size();
-    
     // 1: new coordSys
     //      compute the new normal of the element and update the coordinate system
     Vector3 n = (this->nodes[1]->position - this->nodes[0]->position).cross(
@@ -89,7 +86,7 @@ void Membrane3::explicitStep(double h)
         new_pos_mat.row(row_count) = this->coordSys.toLocal(node->position - this->center);
         row_count ++;
     }
-    
+
     //      find rotation of the local coordinates and rotate the coordinate system
     // coordSys.rotate(pos_mat, new_pos_mat);
 
@@ -101,10 +98,21 @@ void Membrane3::explicitStep(double h)
         row_count ++;
     }
 
+
+
     // 2: B-matrix
     this->dN << -1, 1, 0,
                 -1, 0, 1;
     this->B = (this->dN * this->pos_mat).inverse() * this->dN;
+
+}
+
+void Membrane3::explicitStep(double h)
+{
+    double step_size = h;
+    if (not this->is_valid)
+        return;
+
 
     // 3: strain rate  //? local_velocity as matrix ?
     Vector3 strain_rate;
@@ -120,14 +128,6 @@ void Membrane3::explicitStep(double h)
     // 4: stress rate (hook) ->material,...
     Vector3 stress_rate;
     stress_rate = this->material->C * strain_rate;
-
-    for (int i=0; i<3; i++) {
-        if (!(stress_rate(i)<1000)) {
-            std::cout << "Fehler" << stress_rate << std::endl;
-            std::cout << "Fehler2" << strain_rate << std::endl;
-            std::cout << "Fehler3" << this->material->C << std::endl;
-        }
-    }
     
     // 5: integrate stress_rate (time, area)
     stress += step_size * stress_rate;
@@ -177,9 +177,7 @@ Membrane4::Membrane4(std::vector<NodePtr> points,
     this->material = mat;
     this->nodes = points;
     this->pressure = 0;
-    for (auto node: nodes)
-        center += node->position;
-    center /= nodes.size();
+    this->calculate_center();
     Vector3 n = (nodes[2]->position - nodes[0]->position).cross(
                  nodes[3]->position - nodes[1]->position);
     area = n.norm() / 2;
@@ -244,6 +242,40 @@ void Membrane4::initHG()
     hg_const = 1. / 8. * 0.03 * (material->C(0,0) * area) * (B0.dot(B0) + B1.dot(B1));
     hg_gamma = h - (h.dot(pos_mat.col(0)) * B0 + h.dot(pos_mat.col(0)) * B1);
 }
+
+void Membrane4::geometryStep() {
+    this->calculate_center();
+
+    // 1: new coordSys
+    //      compute the new normal of the element and update the coordinate system
+    Vector3 n = (nodes[2]->position - nodes[0]->position).cross(
+                 nodes[3]->position - nodes[1]->position);
+    area = n.norm() / 2.;
+    check_nan(n, "Membrane3::explicitStep:n");
+    this->coordSys.update(n / area / 2.);
+
+    //      get the local position for the updated coordinate system
+    Eigen::Matrix<double, 4, 2> new_pos_mat;
+    int row_count = 0;
+    for (auto node: this->nodes)
+    {
+        new_pos_mat.row(row_count) = this->coordSys.toLocal(node->position - this->center);
+        row_count ++;
+    }
+
+    //      find rotation of the local coordinates and rotate the coordinate system
+    //coordSys.rotate(pos_mat, new_pos_mat); TODO: CHECK!!!
+
+    //      set the local positions by appling the transformation matrix on global positions
+    row_count = 0;
+    for (auto node: this->nodes)
+    {
+        this->pos_mat.row(row_count) = this->coordSys.toLocal(node->position - this->center);
+        this->vel_mat.row(row_count) = this->coordSys.toLocal(node->velocity);
+        row_count ++;
+    }
+
+}
     
 void Membrane4::explicitStep(double h)
 {
@@ -251,42 +283,7 @@ void Membrane4::explicitStep(double h)
     // 0: properties
     if (not is_valid)
         return;
-    center.setZero();
-    
-    //      find new center
-    for (auto node: nodes)
-        center += node->position;
-    center /= nodes.size();
-    
-    // 1: new coordSys
-    //      compute the new normal of the element and update the coordinate system
-    Vector3 n = (nodes[2]->position - nodes[0]->position).cross(
-                 nodes[3]->position - nodes[1]->position);
-    area = n.norm() / 2.;
-    check_nan(n, "Membrane3::explicitStep:n");
-    coordSys.update(n / area / 2.);
 
-    //      get the local position for the updated coordinate system
-    Eigen::Matrix<double, 4, 2> new_pos_mat;
-    int row_count = 0;
-    for (auto node: nodes)
-    {
-        new_pos_mat.row(row_count) = coordSys.toLocal(node->position - center);
-        row_count ++;
-    }
-    
-    //      find rotation of the local coordinates and rotate the coordinate system
-    //coordSys.rotate(pos_mat, new_pos_mat); TODO: CHECK!!!
-
-    //      set the local positions by appling the transformation matrix on global positions
-    row_count = 0;
-    for (auto node: nodes)
-    {
-        pos_mat.row(row_count) = coordSys.toLocal(node->position - center);
-        vel_mat.row(row_count) = coordSys.toLocal(node->velocity);
-        row_count ++;
-    }
-    
     // 2: B-matrix
     // 3: strain rate
 

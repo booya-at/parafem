@@ -24,6 +24,10 @@ MaterialPtr Truss::getMaterial()
     return std::dynamic_pointer_cast<Material>(this->material);
 }
 
+void Truss::geometryStep() {
+
+}
+
 
 void Truss::explicitStep(double h)
 {
@@ -83,6 +87,10 @@ LineJoint::LineJoint(const std::vector<NodePtr> nodes, std::shared_ptr<TrussMate
     this->material = material;
     this->nodes = nodes;
     assert(nodes.size() > 3);
+}
+
+void LineJoint::geometryStep() {
+
 }
 
 void LineJoint::explicitStep(double h)

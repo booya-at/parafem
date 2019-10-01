@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
 
     // SIM
     double stepsize = 0.005;
-    int interations = 500;
+    int iterations = 500;
     int num_export = 100;
     
     // MATERIAL
@@ -85,13 +85,13 @@ int main(int argc, char **argv) {
     paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/paraFEM/membrane3_2/output");
 
     // LOOP
-    for (int i=0; i<interations; i++)
+    for (int i=0; i<iterations; i++)
     {
         c1->explicitStep(stepsize);
-        if (i % int(interations / num_export) == 0)
+        if (i % int(iterations / num_export) == 0)
         {
             writer.writeCase(c1);
-            cout << "time: "<< c1->time << " of " << interations * stepsize << endl;
+            cout << "time: "<< c1->time << " of " << iterations * stepsize << endl;
         }
     }
 }

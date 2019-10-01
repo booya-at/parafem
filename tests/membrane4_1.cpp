@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
 
     // SIM
     double stepsize = 0.0001;
-    int interations = 100000;
+    int iterations = 100000;
     int num_export = 100;
     
     // MATERIAL
@@ -50,10 +50,10 @@ int main(int argc, char **argv) {
 
     paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/paraFEM/membrane4_1/output");
 
-    for (int i=0; i<interations; i++)
+    for (int i=0; i<iterations; i++)
     {
         c1->explicitStep(stepsize);
-        if (i % int(interations / num_export) == 0)
+        if (i % int(iterations / num_export) == 0)
             writer.writeCase(c1, 0.3);
     }
     cout << "spannung in x richtung: " << m1->getStress().x() << endl;

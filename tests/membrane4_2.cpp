@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
 
     // SIM
     double stepsize = 0.001;
-    int interations = 5000;
+    int iterations = 5000;
     int num_export = 50;
     
     // MATERIAL
@@ -86,15 +86,15 @@ int main(int argc, char **argv) {
 
     stepsize = std::get<0>(c1->getExplicitMaxTimeStep());
     stepsize /= 1.01;
-    interations = 5 / stepsize;
+    iterations = 5 / stepsize;
     // LOOP;
-    for (int i=0; i<interations; i++)
+    for (int i=0; i<iterations; i++)
     {
         c1->explicitStep(stepsize);
-        if (i % int(interations / num_export) == 0)
+        if (i % int(iterations / num_export) == 0)
         {
             writer.writeCase(c1);
-            cout << "time: "<< c1->time << " of " << interations * stepsize << endl;
+            cout << "time: "<< c1->time << " of " << iterations * stepsize << endl;
         }
     }
 }

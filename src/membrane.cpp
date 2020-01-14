@@ -266,7 +266,7 @@ void Membrane4::geometryStep() {
     //      find rotation of the local coordinates and rotate the coordinate system
     //coordSys.rotate(pos_mat, new_pos_mat); TODO: CHECK!!!
 
-    //      set the local positions by appling the transformation matrix on global positions
+    //      set the local positions by applying the transformation matrix on global positions
     row_count = 0;
     for (auto node: this->nodes)
     {

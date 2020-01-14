@@ -146,7 +146,7 @@ Eigen::Matrix2d findRotMat(Eigen::Matrix2Xd in, Eigen::Matrix2Xd out)
     A.translation() = Eigen::Vector2d::Zero();
 
     if (in.cols() != out.cols())
-        throw "Find3DAffineTransform(): input data mis-match";
+        throw "Find3DAffineTransform(): input data mismatch";
 
     // First find the scale, by finding the ratio of sums of some distances,
     // then bring the datasets to the same scale.

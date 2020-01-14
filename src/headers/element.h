@@ -79,7 +79,7 @@ struct Truss: public Element
 
 struct LineJoint: public Element
 {
-// elment that connects nodes that are not exactly matching
+// element that connects nodes that are not exactly matching
     LineJoint(const std::vector<NodePtr>, std::shared_ptr<TrussMaterial>);
     virtual void geometryStep();
     virtual void explicitStep(double h);

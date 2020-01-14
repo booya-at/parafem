@@ -40,8 +40,8 @@ int main(int argc, char **argv) {
     n3->fixed << 1, 0, 0;
     n4->fixed << 1, 0, 0;
     
-    n3->externalForce << force/2, 0, 0;
-    n4->externalForce << force/2, 0, 0;
+    n3->external_force << force/2, 0, 0;
+    n4->external_force << force/2, 0, 0;
   
     std::shared_ptr<paraFEM::MembraneMaterial> mat (new paraFEM::MembraneMaterial(E, nue));
     mat->d_structural = structural_damping;
@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
 
     for (int i=0; i<iterations; i++)
     {
-        c1->explicitStep(stepsize);
+        c1->explicit_step(stepsize);
         if (i % int(iterations / num_export) == 0)
             writer.writeCase(c1, 0.3);
     }

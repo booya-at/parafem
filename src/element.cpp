@@ -72,7 +72,7 @@ void CoordSys::update(Vector3 n_vec, Vector3 t1_vec)
 
 void CoordSys::rotate(std::vector< Vector2 > first, std::vector< Vector2 > second)
 {
-   Eigen::Matrix2d rot = findRotMat(first, second);
+   Eigen::Matrix2d rot = find_rot_mat(first, second);
    mat = rot.transpose() * mat;   //rot.T?
    t1 = mat.row(0);
    t2 = mat.row(1);
@@ -82,7 +82,7 @@ void CoordSys::rotate(std::vector< Vector2 > first, std::vector< Vector2 > secon
 
 void CoordSys::rotate(Eigen::MatrixX2d first, Eigen::MatrixX2d second)
 {
-   Eigen::Matrix2d rot = findRotMat(first.transpose(), second.transpose());
+   Eigen::Matrix2d rot = find_rot_mat(first.transpose(), second.transpose());
    mat = rot.transpose() * mat;   //rot.T?
    t1 = mat.row(0);
    t2 = mat.row(1);
@@ -128,7 +128,7 @@ IntegrationPoint::IntegrationPoint(double eta_in, double zeta_in, double weight_
 }
 
 
-Eigen::Matrix2Xd toMatrix(std::vector<Vector2> in)
+Eigen::Matrix2Xd to_matrix(std::vector<Vector2> in)
 {
     Eigen::Matrix2Xd out;
     out.resize(2, in.size());
@@ -139,7 +139,7 @@ Eigen::Matrix2Xd toMatrix(std::vector<Vector2> in)
     return out;
 }
 
-Eigen::Matrix2d findRotMat(Eigen::Matrix2Xd in, Eigen::Matrix2Xd out)
+Eigen::Matrix2d find_rot_mat(Eigen::Matrix2Xd in, Eigen::Matrix2Xd out)
 {
     Eigen::Affine2d A;
     A.linear() = Eigen::Matrix2d::Identity(2, 2);
@@ -195,9 +195,9 @@ Eigen::Matrix2d findRotMat(Eigen::Matrix2Xd in, Eigen::Matrix2Xd out)
     return A.linear();
 }
 
-Eigen::Matrix2d findRotMat(std::vector<Vector2> p, std::vector<Vector2> q)
+Eigen::Matrix2d find_rot_mat(std::vector<Vector2> p, std::vector<Vector2> q)
 {
-    return findRotMat(toMatrix(p), toMatrix(q));
+    return find_rot_mat(to_matrix(p), to_matrix(q));
 }
 
 }

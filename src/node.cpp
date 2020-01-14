@@ -11,19 +11,19 @@ Node::Node(double x, double y, double z)
     this->acceleration.setZero();
     this->massInfluence = 1.;
     this->fixed.setOnes();
-    this->externalForce.setZero();
-    this->internalForce.setZero();
+    this->external_force.setZero();
+    this->internal_force.setZero();
 }
 
-void Node::solveEquilibrium(double h, double externalFactor)
+void Node::solveEquilibrium(double h, double external_factor)
 {
-    this->acceleration = 1. / this->massInfluence * (this->externalForce * externalFactor - this->internalForce);
+    this->acceleration = 1. / this->massInfluence * (this->external_force * external_factor - this->internal_force);
     this->velocity += h * (this->acceleration.cwiseProduct(fixed));   // at time t + 0.5h
     this->position += this->velocity * h;       // at time t + 1
 
     /*
     if (is_nan(this->acceleration) || is_nan(this->velocity) || is_nan(this->position)){
-        std::cout << "ERR" << this->massInfluence << "/" << this->externalForce << "/" << this->internalForce << std::endl;
+        std::cout << "ERR" << this->massInfluence << "/" << this->external_force << "/" << this->internal_force << std::endl;
     }*/
     check_nan(this->acceleration, "node_solve_equilibrium:acceleration");
     check_nan(this->velocity, "node_solve_equilibrium:velocity");
@@ -33,7 +33,7 @@ void Node::solveEquilibrium(double h, double externalFactor)
 
 void Node::add_external_force(Vector3 force)
 {
-    externalForce += force;
+    external_force += force;
 }
 
 }

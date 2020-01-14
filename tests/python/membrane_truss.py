@@ -41,7 +41,7 @@ case = paraFEM.Case([m1, m2, m3, t1, t2])
 writer = paraFEM.vtkWriter("/tmp/test_mbr_truss/bla")
 
 for i in range(50000):
-    case.explicitStep(h=0.00001)
+    case.explicit_step(h=0.00001)
     if i % 1000 == 0:
         print(i)
         writer.writeCase(case, 0.1)

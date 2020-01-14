@@ -84,13 +84,13 @@ int main(int argc, char **argv) {
     // WRITER
     paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/paraFEM/membrane4_2/int0output");
 
-    stepsize = std::get<0>(c1->getExplicitMaxTimeStep());
+    stepsize = std::get<0>(c1->get_explicit_max_time_step());
     stepsize /= 1.01;
     iterations = 5 / stepsize;
     // LOOP;
     for (int i=0; i<iterations; i++)
     {
-        c1->explicitStep(stepsize);
+        c1->explicit_step(stepsize);
         if (i % int(iterations / num_export) == 0)
         {
             writer.writeCase(c1);

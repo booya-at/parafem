@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
         n3->position += paraFEM::Vector3(0.01, 0, 0);
         n2->velocity.x() = 0.01 / 0.001;
         n3->velocity.x() = 0.01 / 0.001;
-        c1->explicitStep(0.001);
+        c1->explicit_step(0.001);
         if (i % 10 == 0)
             writer.writeCase(c1, 0.4);
     }

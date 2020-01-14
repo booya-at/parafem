@@ -29,7 +29,7 @@ void Truss::geometryStep() {
 }
 
 
-void Truss::explicitStep(double h)
+void Truss::explicit_step(double h)
 {
     // update the coordinate system
     tangent =  nodes[1]->position - nodes[0]->position;
@@ -47,13 +47,13 @@ void Truss::explicitStep(double h)
 
     // internal force with virtual power
     double absStress = stress + stress_rate * material->d_structural + dViscous * strain_rate;
-    nodes[1]->internalForce -= tangent * absStress;
-    nodes[0]->internalForce += tangent * absStress;
+    nodes[1]->internal_force -= tangent * absStress;
+    nodes[0]->internal_force += tangent * absStress;
     for (auto node: nodes)
-        node->internalForce += node->velocity * material->d_velocity * new_length / nodes.size();
+        node->internal_force += node->velocity * material->d_velocity * new_length / nodes.size();
 }
 
-void Truss::implicitStep(std::vector<trip> & Kt)
+void Truss::implicit_step(std::vector<trip> & Kt)
 {   
     // update the coordinate system
     tangent =  nodes[1]->position - nodes[0]->position;
@@ -93,7 +93,7 @@ void LineJoint::geometryStep() {
 
 }
 
-void LineJoint::explicitStep(double h)
+void LineJoint::explicit_step(double h)
 {
     Vector3 t = nodes[1]->position - nodes[0]->position;
     t.normalize();
@@ -101,7 +101,7 @@ void LineJoint::explicitStep(double h)
     {
         Vector3 ti = nodes[i]->position - nodes[0]->position;
         Vector3 n_diff = nodes[0]->position + ti.dot(t) * t - nodes[i]->position;
-        nodes[i]->internalForce += this->material->elasticity * n_diff;
+        nodes[i]->internal_force += this->material->elasticity * n_diff;
     }
 }
 

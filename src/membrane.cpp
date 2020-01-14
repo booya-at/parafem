@@ -75,7 +75,7 @@ void Membrane3::geometryStep() {
     Vector3 n = (this->nodes[1]->position - this->nodes[0]->position).cross(
                  this->nodes[2]->position - this->nodes[1]->position);
     this->area = n.norm() / 2.;
-    check_nan(n, "Membrane3::explicitStep:n");
+    check_nan(n, "Membrane3::explicit_step:n");
     this->coordSys.update(n / area / 2, this->nodes[1]->position - this->nodes[0]->position);
 
     //      get the local position for the updated coordinate system
@@ -87,7 +87,7 @@ void Membrane3::geometryStep() {
         row_count ++;
     }
 
-    //      find rotation of the local coordinates and rotate the coordinate system
+    //      find rotation of the local coordinaties and rotate the coordinate system
     // coordSys.rotate(pos_mat, new_pos_mat);
 
     row_count = 0;
@@ -107,7 +107,7 @@ void Membrane3::geometryStep() {
 
 }
 
-void Membrane3::explicitStep(double h)
+void Membrane3::explicit_step(double h)
 {
     double step_size = h;
     if (not this->is_valid)
@@ -148,16 +148,16 @@ void Membrane3::explicitStep(double h)
                              +  this->B(1, i) * (local_force(2) + structural_damping(2));
         local_node_force.y() += this->B(1, i) * (local_force(1) + structural_damping(1) + hydrostatic_damping(1))
                              +  this->B(0, i) * (local_force(2) + structural_damping(2));
-        this->nodes[i]->internalForce += this->coordSys.toGlobal(local_node_force);
+        this->nodes[i]->internal_force += this->coordSys.toGlobal(local_node_force);
     }
     Vector3 force_cp = this->pressure / nodes.size() * this->coordSys.n;
     double damping = this->material->d_velocity * this->area / this->nodes.size();
     for (auto node: this->nodes)
     {
-        node->internalForce -= force_cp;
-        node->internalForce += node->velocity * damping;
+        node->internal_force -= force_cp;
+        node->internal_force += node->velocity * damping;
 
-        check_nan(node->internalForce, "membrane3:explicitstep:node_internal_force");
+        check_nan(node->internal_force, "membrane3:explicit_step:node_internal_force");
     }
 
     
@@ -251,7 +251,7 @@ void Membrane4::geometryStep() {
     Vector3 n = (nodes[2]->position - nodes[0]->position).cross(
                  nodes[3]->position - nodes[1]->position);
     area = n.norm() / 2.;
-    check_nan(n, "Membrane3::explicitStep:n");
+    check_nan(n, "Membrane3::explicit_step:n");
     this->coordSys.update(n / area / 2.);
 
     //      get the local position for the updated coordinate system
@@ -277,7 +277,7 @@ void Membrane4::geometryStep() {
 
 }
     
-void Membrane4::explicitStep(double h)
+void Membrane4::explicit_step(double h)
 {
     double step_size = h;
     // 0: properties
@@ -291,7 +291,7 @@ void Membrane4::explicitStep(double h)
     Vector3 stress_rate;
     Vector2 local_node_force;
     for (auto node: this->nodes) {
-        check_nan(node->internalForce, "membrane4:explicitstep:node_internal_force0");
+        check_nan(node->internal_force, "membrane4:explicit_step:node_internal_force0");
     }
 
     for (IntegrationPoint& int_point: integration_points)
@@ -329,22 +329,22 @@ void Membrane4::explicitStep(double h)
                                      +  B(1, i) * (local_force(2) + structural_damping(2));
                 local_node_force.y() += B(1, i) * (local_force(1) + structural_damping(1) + hydrostatic_damping(1))
                                      +  B(0, i) * (local_force(2) + structural_damping(2));
-                nodes[i]->internalForce += int_point.weight * coordSys.toGlobal(local_node_force);
+                nodes[i]->internal_force += int_point.weight * coordSys.toGlobal(local_node_force);
             }
 
     }
 
     for (auto node: this->nodes) {
-        check_nan(node->internalForce, "membrane4:explicitstep:node_internal_force1");
+        check_nan(node->internal_force, "membrane4:explicit_step:node_internal_force1");
     }
     for (auto node: nodes)
     {
-        node->internalForce -= pressure / nodes.size() * this->coordSys.n;
-        node->internalForce += node->velocity * material->d_velocity * area / nodes.size();
+        node->internal_force -= pressure / nodes.size() * this->coordSys.n;
+        node->internal_force += node->velocity * material->d_velocity * area / nodes.size();
     }
 
     for (auto node: this->nodes) {
-        check_nan(node->internalForce, "membrane4:explicitstep:node_internal_force2");
+        check_nan(node->internal_force, "membrane4:explicit_step:node_internal_force2");
     }
     // 7: hourglasscontrol
     if (integration_points.size() == 1)
@@ -356,12 +356,12 @@ void Membrane4::explicitStep(double h)
             local_node_force.setZero();
             local_node_force.x() += hg_gamma[i] * hg_stress.x();
             local_node_force.y() += hg_gamma[i] * hg_stress.y();
-            nodes[i]->internalForce += coordSys.toGlobal(local_node_force);
+            nodes[i]->internal_force += coordSys.toGlobal(local_node_force);
         }
     }
 
     for (auto node: this->nodes) {
-        check_nan(node->internalForce, "membrane4:explicitstep:node_internal_force3");
+        check_nan(node->internal_force, "membrane4:explicit_step:node_internal_force3");
     }
 }
 

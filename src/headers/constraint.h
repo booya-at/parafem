@@ -34,18 +34,18 @@ struct SymmetricPosition: public PositionConstraint
 {
 	// updates the position of the symmetric points.
 
-	std::vector<std::array<NodePtr, 2>> symPoints;
-	Eigen::Vector3d mirrorPoint, mirrorNormal;
-	SymmetricPosition(std::vector<NodePtr> points, Eigen::Vector3d mirrorPoint, Eigen::Vector3d mirrorNormal);
+	std::vector<std::array<NodePtr, 2>> sym_points;
+	Eigen::Vector3d mirror_point, mirror_normal;
+	SymmetricPosition(std::vector<NodePtr> points, Eigen::Vector3d mirror_point, Eigen::Vector3d mirror_normal);
 	virtual void updatePosition() = 0;
 };
 
 struct SymmetricForce: public ForceConstraint
 {
 	// applying the mirrored internal force
-	std::vector<NodePtr> symPoints; 
-	Eigen::Vector3d mirrorPoint, mirrorNormal;
-	SymmetricForce(std::vector<NodePtr> points, Eigen::Vector3d mirrorPoint, Eigen::Vector3d mirrorNormal);
+	std::vector<NodePtr> sym_points; 
+	Eigen::Vector3d mirror_point, mirror_normal;
+	SymmetricForce(std::vector<NodePtr> points, Eigen::Vector3d mirror_point, Eigen::Vector3d mirror_normal);
 	virtual void updateForce() = 0;
 };
 

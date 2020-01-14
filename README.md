@@ -62,7 +62,7 @@ case = paraFEM.Case([truss1, truss2])
 writer = paraFEM.vtkWriter("/tmp/paraFEM/truss1_py/output")
 
 for i in range(10000):
-    case.explicitStep(0.01)
+    case.explicit_step(0.01)
     if (i % 10) == 0:
         writer.writeCase(case, 0.3)
 ```

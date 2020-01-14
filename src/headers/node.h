@@ -21,14 +21,14 @@ public:
     Vector3 velocity;
     Vector3 acceleration;
     
-    Vector3 externalForce;
-    Vector3 internalForce;
+    Vector3 external_force;
+    Vector3 internal_force;
 
     void add_external_force(Vector3 force);
     
     double massInfluence = 1;
 
-    void solveEquilibrium(double h, double externalFactor=1);
+    void solveEquilibrium(double h, double external_factor=1);
     Vector3 fixed;
     
     int nr;

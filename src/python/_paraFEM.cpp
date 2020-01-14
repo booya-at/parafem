@@ -67,8 +67,8 @@ PYBIND11_MODULE(_paraFEM, m){
 
     py::class_<paraFEM::FemCase, paraFEM::FemCasePtr> (m, "Case")
         .def(py::init<std::vector<paraFEM::ElementPtr>>())
-        .def("explicitStep", &paraFEM::FemCase::explicitStep, "make one explicit step",
-            py::arg("h") = 0.0001, py::arg("externalFactor") = 1)
-        .def("getExplicitMaxTimeStep", &paraFEM::FemCase::getExplicitMaxTimeStep, "cfl - value")
+        .def("explicit_step", &paraFEM::FemCase::explicit_step, "make one explicit step",
+            py::arg("h") = 0.0001, py::arg("external_factor") = 1)
+        .def("get_explicit_max_time_step", &paraFEM::FemCase::get_explicit_max_time_step, "cfl - value")
         .def("getMaxVelocity", &paraFEM::FemCase::getMaxVelocity, "get Max node velocity");
 };

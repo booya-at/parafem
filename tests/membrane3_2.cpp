@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
     // LOOP
     for (int i=0; i<iterations; i++)
     {
-        c1->explicitStep(stepsize);
+        c1->explicit_step(stepsize);
         if (i % int(iterations / num_export) == 0)
         {
             writer.writeCase(c1);

@@ -26,12 +26,12 @@ public:
             std::vector<ForceConstraintPtr>);
     std::set<NodePtr> nodes;
     std::vector<ElementPtr> elements;
-    std::vector<ForceConstraintPtr> forceConstraints;
-    std::vector<PositionConstraintPtr> posConstraints;
-    void explicitStep(double h, double externalFactor=1);
-    void implicitStep(double h, double externalFactor=1);
+    std::vector<ForceConstraintPtr> force_constraints;
+    std::vector<PositionConstraintPtr> pos_constraints;
+    void explicit_step(double h, double external_factor=1);
+    void implicit_step(double h, double external_factor=1);
     double getMaxVelocity();
-    std::tuple<double, ElementPtr> getExplicitMaxTimeStep();
+    std::tuple<double, ElementPtr> get_explicit_max_time_step();
     NodeVec get_nodes();
 
 };

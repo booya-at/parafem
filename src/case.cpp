@@ -6,11 +6,11 @@
 namespace paraFEM {
 
 FemCase::FemCase(std::vector<ElementPtr> elements, 
-                 std::vector<PositionConstraintPtr> posConstraints,
-                 std::vector<ForceConstraintPtr> forceConstraints): FemCase::FemCase(elements)
+                 std::vector<PositionConstraintPtr> pos_constraints,
+                 std::vector<ForceConstraintPtr> force_constraints): FemCase::FemCase(elements)
 {
-    this->posConstraints = posConstraints;
-    this->forceConstraints = forceConstraints;
+    this->pos_constraints = pos_constraints;
+    this->force_constraints = force_constraints;
 }
 
 FemCase::FemCase(std::vector<ElementPtr> elements)
@@ -21,13 +21,13 @@ FemCase::FemCase(std::vector<ElementPtr> elements)
             this->nodes.insert(node);
         this->elements.push_back(element);
     }
-    std::cout << "maxTimeStep= " << std::get<0>(this->getExplicitMaxTimeStep()) << std::endl;
+    std::cout << "maxTimeStep= " << std::get<0>(this->get_explicit_max_time_step()) << std::endl;
     int count = 0;
     for (auto node: nodes)
         node->nr = count ++;
 }
 
-std::tuple<double, ElementPtr> FemCase::getExplicitMaxTimeStep()
+std::tuple<double, ElementPtr> FemCase::get_explicit_max_time_step()
 {
 
     double maxTimeStep = 1;
@@ -54,7 +54,7 @@ double FemCase::getMaxVelocity() {
 }
 
 
-void FemCase::explicitStep(double h, double externalFactor)
+void FemCase::explicit_step(double h, double external_factor)
 {
     time += h;
     auto node_cp = this->get_nodes();
@@ -68,20 +68,20 @@ void FemCase::explicitStep(double h, double externalFactor)
     for(int i = 0; i < elements.size(); i++)
     {
         auto element = elements[i];
-        element->explicitStep(h);  // computing the internal forces
+        element->explicit_step(h);  // computing the internal forces
     }
 
     #pragma omp parallel for
     for(int j = 0; j < node_cp.size(); j++)
     {
         auto node = node_cp[j];
-        node->solveEquilibrium(h, externalFactor);
-        node->internalForce.setZero();
+        node->solveEquilibrium(h, external_factor);
+        node->internal_force.setZero();
     }
     
 }
 
-// void FemCase::implicitStep(double h, double externalFactor)
+// void FemCase::implicit_step(double h, double external_factor)
 // {
 //     time += h;
 //     auto node_cp = this->get_nodes();
@@ -92,7 +92,7 @@ void FemCase::explicitStep(double h, double externalFactor)
 //     for(int j = 0; j < elements.size(); j++)
 //     {
 //         auto element = elements[j];
-//         element->implicitStep(h, Kt, Dt, Mt);
+//         element->implicit_step(h, Kt, Dt, Mt);
 //     }
 //     // create global matrices from triplets
 

@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
     paraFEM::NodePtr n3 (new paraFEM::Node(1, 0, 0));
     n1->fixed = paraFEM::Vector3(0,0,0);
     n3->fixed = paraFEM::Vector3(0,0,0);
-    n2->externalForce.y() -= 1;
+    n2->external_force.y() -= 1;
     std::shared_ptr<paraFEM::TrussMaterial> mat (new paraFEM::TrussMaterial(1000));
     mat->d_structural = 0.00;
     paraFEM::TrussPtr t1 (new paraFEM::Truss(paraFEM::NodeVec{n1, n2}, mat));
@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/paraFEM/truss1/output");
     for (int i=0; i<1000; i++)
     {
-        c1->explicitStep(0.01);
+        c1->explicit_step(0.01);
         if (i % 10 == 0)
             writer.writeCase(c1);
         

@@ -15,9 +15,9 @@ namespace paraFEM
 
 typedef Eigen::Triplet<double> trip;
 
-Eigen::Matrix2Xd toMatrix(std::vector<Vector2>);
-Eigen::Matrix2d findRotMat(std::vector<Vector2>, std::vector<Vector2>);
-Eigen::Matrix2d findRotMat(Eigen::Matrix2Xd in, Eigen::Matrix2Xd out);
+Eigen::Matrix2Xd to_matrix(std::vector<Vector2>);
+Eigen::Matrix2d find_rot_mat(std::vector<Vector2>, std::vector<Vector2>);
+Eigen::Matrix2d find_rot_mat(Eigen::Matrix2Xd in, Eigen::Matrix2Xd out);
 
 
 struct CoordSys: Base
@@ -51,8 +51,9 @@ struct Element: Base
 {
     std::vector<NodePtr> nodes;
     virtual void geometryStep() = 0;
-    virtual void explicitStep(double h) = 0;  // compute the internal forces acting on the nodes.
-    // virtual void implicitStep(double h) = 0;
+    virtual void explicit_step(double h) = 0;  // compute the internal forces acting on the nodes.
+    // virtual void implicit_step(double h) = 0;
+    virtual void implicit_stresses();
     std::vector<int> getNr();
     virtual Vector3 getStress()=0;
     bool is_valid = true;
@@ -70,8 +71,8 @@ struct Truss: public Element
     virtual Vector3 getStress();
     double stress;           // at timestep n
     virtual void geometryStep();
-    virtual void explicitStep(double h);
-    virtual void implicitStep(std::vector<trip> & Kt);
+    virtual void explicit_step(double h);
+    virtual void implicit_step(std::vector<trip> & Kt);
     std::shared_ptr<TrussMaterial> material;
     void addNodalPressure(Vector3);
     MaterialPtr getMaterial();
@@ -82,7 +83,7 @@ struct LineJoint: public Element
 // element that connects nodes that are not exactly matching
     LineJoint(const std::vector<NodePtr>, std::shared_ptr<TrussMaterial>);
     virtual void geometryStep();
-    virtual void explicitStep(double h);
+    virtual void explicit_step(double h);
     virtual Vector3 getStress();
     std::shared_ptr<TrussMaterial> material;
 };
@@ -104,7 +105,7 @@ struct Membrane3: public Membrane
 {
     Membrane3(const std::vector<NodePtr>, std::shared_ptr<MembraneMaterial>);
     virtual void geometryStep();
-    virtual void explicitStep(double h);
+    virtual void explicit_step(double h);
     Vector3 stress;
     virtual Vector3 getStress();
 
@@ -117,7 +118,7 @@ struct Membrane4: public  Membrane
     Membrane4(const std::vector<NodePtr>, std::shared_ptr<MembraneMaterial>, bool reduced_integration=true);
     std::vector<IntegrationPoint> integration_points;  //eta, zeta, weight, stress
     virtual void geometryStep();
-    virtual void explicitStep(double h);
+    virtual void explicit_step(double h);
     
     // hourglass control
     void initHG();

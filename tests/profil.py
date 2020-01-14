@@ -100,7 +100,7 @@ line_forces = []
 
 for i in range(steps):
     ramp = 1 - (i < steps_ramp) * (1 - float(i) / steps_ramp)
-    case.explicitStep(case.getExplicitMaxTimeStep()[0] / 2, ramp)
+    case.explicit_step(case.get_explicit_max_time_step()[0] / 2, ramp)
     if (i % 500) == 0:
         print(i)
         line_forces.append([np.linalg.norm(l.getStress()) for l in lines])

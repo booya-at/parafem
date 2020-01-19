@@ -13,7 +13,7 @@
 
 #include "Eigen/Core"
 
-namespace paraFEM
+namespace parafem
 {
 
 class FemCase: Base
@@ -29,8 +29,8 @@ public:
     std::vector<ForceConstraintPtr> force_constraints;
     std::vector<PositionConstraintPtr> pos_constraints;
     void explicit_step(double h, double external_factor=1);
-    void implicit_step(double h, double external_factor=1);
-    double getMaxVelocity();
+    void apply_forces();
+    double get_max_velocity();
     std::tuple<double, ElementPtr> get_explicit_max_time_step();
     NodeVec get_nodes();
 

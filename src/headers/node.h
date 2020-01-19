@@ -8,7 +8,7 @@
 #include <vector>
 
 
-namespace paraFEM
+namespace parafem
 {
 
     
@@ -26,7 +26,7 @@ public:
 
     void add_external_force(Vector3 force);
     
-    double massInfluence = 1;
+    double mass_influence = 1;
 
     void solveEquilibrium(double h, double external_factor=1);
     Vector3 fixed;

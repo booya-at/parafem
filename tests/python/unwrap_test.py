@@ -1,4 +1,4 @@
-import paraFEM
+import parafem
 import os
 vertices = []
 triangles = []
@@ -12,7 +12,7 @@ with open(os.path.dirname(__file__) + "/half_sphere.obj") as fo:
         if line[0] == "f":
             triangles.append([int(p) - 1 for p in line[2:].split()])
 
-unwrapper = paraFEM.LscmRelax(vertices, triangles, [])
+unwrapper = parafem.LscmRelax(vertices, triangles, [])
 unwrapper.lscm()
 unwrapper.relax(0.01)
 print(unwrapper.sol)

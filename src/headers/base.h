@@ -2,7 +2,7 @@
 #define BASE_H
 
 
-namespace paraFEM
+namespace parafem
 {
 class Base
 {

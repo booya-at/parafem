@@ -28,7 +28,7 @@ requirements:
 
 test:
     imports:
-        - paraFEM
+        - parafem
 
 about:
     summary: explicit fem for membrane elements

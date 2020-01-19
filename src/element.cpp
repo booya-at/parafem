@@ -1,7 +1,7 @@
 #include "element.h"
 #include <iostream>
 
-namespace paraFEM {
+namespace parafem {
     
 CoordSys::CoordSys(Vector3 n_vec)
 {
@@ -92,25 +92,25 @@ void CoordSys::rotate(Eigen::MatrixX2d first, Eigen::MatrixX2d second)
 
 
 
-Vector2 CoordSys::toLocal(Vector3 vec)
+Vector2 CoordSys::to_local(Vector3 vec)
 {
     return mat * vec;
 }
 
-Vector3 CoordSys::toGlobal(Vector2 vec)
+Vector3 CoordSys::to_global(Vector2 vec)
 {
     Vector3 result = mat.transpose() * vec;
     if (is_nan(result)) {
         std::cout << "Error" << this->mat << "//" << vec << "->" << result << std::endl;
         std::cout << "N" << this->n << "//t1" << this->t1 << "//t2: " << this->t2 << std::endl;
     }
-    check_nan(result, "CoordSys::toGlobal");
+    check_nan(result, "CoordSys::to_global");
 
     return result;
 }
 
 
-std::vector< int > Element::getNr()
+std::vector< int > Element::get_number()
 {
     std::vector< int > numbers;
     for (auto node: nodes)

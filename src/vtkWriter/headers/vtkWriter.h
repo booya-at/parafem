@@ -11,7 +11,7 @@
 
 using namespace std;
 
-namespace paraFEM{
+namespace parafem{
 
 class VtkWriter{
 private:
@@ -19,7 +19,7 @@ private:
     int count = 0;
 public:
     VtkWriter(const char* file_name);
-    int writeCase(paraFEM::FemCasePtr c, double coordSysSize=0);
+    int writeCase(parafem::FemCasePtr c, double coordSysSize=0);
 };
 
 

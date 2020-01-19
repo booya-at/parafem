@@ -16,14 +16,14 @@
 #include <vtkFloatArray.h>
 #include <vtkCellData.h>
 
-namespace paraFEM{
+namespace parafem{
 
 VtkWriter::VtkWriter(const char* file_name)
 {
     this->file_name = file_name;
 }
 
-int VtkWriter::writeCase(paraFEM::FemCasePtr c, double coordSysSize)
+int VtkWriter::writeCase(parafem::FemCasePtr c, double coordSysSize)
 {
     vtkSmartPointer<vtkPolyDataWriter> writer = vtkSmartPointer<vtkPolyDataWriter>::New();
     vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();  // data container
@@ -40,13 +40,13 @@ int VtkWriter::writeCase(paraFEM::FemCasePtr c, double coordSysSize)
     pressure->SetNumberOfComponents(1);
     pressure->SetName("pressure");
     
-    std::vector<paraFEM::TrussPtr> truss_elements;
-    std::vector<paraFEM::MembranePtr> membrane_elements;
+    std::vector<parafem::TrussPtr> truss_elements;
+    std::vector<parafem::MembranePtr> membrane_elements;
     
     for (auto element: c->elements)
     {
-        paraFEM::TrussPtr t = std::dynamic_pointer_cast<paraFEM::Truss>(element);
-        paraFEM::MembranePtr m = std::dynamic_pointer_cast<paraFEM::Membrane>(element);
+        parafem::TrussPtr t = std::dynamic_pointer_cast<parafem::Truss>(element);
+        parafem::MembranePtr m = std::dynamic_pointer_cast<parafem::Membrane>(element);
         if (t)
             truss_elements.push_back(t);
         if (m)
@@ -57,10 +57,10 @@ int VtkWriter::writeCase(paraFEM::FemCasePtr c, double coordSysSize)
     int counter = 0;
     if (coordSysSize > 0)
     {
-        paraFEM::Vector3 center; //counter
-        paraFEM::Vector3 x;      // counter +1
-        paraFEM::Vector3 y;      // counter +2
-        paraFEM::Vector3 z;      // counter +3
+        parafem::Vector3 center; //counter
+        parafem::Vector3 x;      // counter +1
+        parafem::Vector3 y;      // counter +2
+        parafem::Vector3 z;      // counter +3
         for (auto element: membrane_elements)
         {
             if (element->is_valid)
@@ -69,7 +69,7 @@ int VtkWriter::writeCase(paraFEM::FemCasePtr c, double coordSysSize)
                 x = center + element->coordSys.t1 * coordSysSize;
                 y = center + element->coordSys.t2 * coordSysSize;
                 z = center + element->coordSys.n * coordSysSize;
-                for (auto pos: vector<paraFEM::Vector3>{center, x, y, z})
+                for (auto pos: vector<parafem::Vector3>{center, x, y, z})
                     points->InsertNextPoint(pos.x(), pos.y(), pos.z());
                 for (int i = 0; i < 3; i++)
                 {
@@ -89,7 +89,7 @@ int VtkWriter::writeCase(paraFEM::FemCasePtr c, double coordSysSize)
     
     for (auto node: c->nodes)
     {
-        paraFEM::Vector3 pos = node->position;
+        parafem::Vector3 pos = node->position;
         points->InsertNextPoint(pos.x(), pos.y(), pos.z());
     }
 
@@ -97,12 +97,12 @@ int VtkWriter::writeCase(paraFEM::FemCasePtr c, double coordSysSize)
     {
         if (element->is_valid)
         {
-            vector<int> numbers = element->getNr();
+            vector<int> numbers = element->get_number();
             vtkSmartPointer<vtkLine> line = vtkSmartPointer<vtkLine>::New();
             line->GetPointIds()->SetId(0, numbers[0] + counter);
             line->GetPointIds()->SetId(1, numbers[1] + counter);
             lines->InsertNextCell(line);
-            paraFEM::Vector3 stress = element->getStress();
+            parafem::Vector3 stress = element->get_stress();
             cellData->InsertNextTuple3(stress.x(), stress.y(), stress.z());  //scalar
             pressure->InsertNextValue(0);
         }
@@ -112,13 +112,13 @@ int VtkWriter::writeCase(paraFEM::FemCasePtr c, double coordSysSize)
     {
         if (element->is_valid)
         {
-            vector<int> numbers = element->getNr();
+            vector<int> numbers = element->get_number();
             vtkSmartPointer<vtkPolygon> polygon = vtkSmartPointer<vtkPolygon>::New();
             for (int nr: numbers) {
                 polygon->GetPointIds()->InsertNextId(nr + counter);
             }
             polygons->InsertNextCell(polygon);
-            paraFEM::Vector3 stress = element->getStress();
+            parafem::Vector3 stress = element->get_stress();
             cellData->InsertNextTuple3(stress.x(), stress.y(), stress.z());
             pressure->InsertNextValue(element->pressure);
         }

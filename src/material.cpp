@@ -1,7 +1,7 @@
 #include "material.h"
 
 
-namespace paraFEM {
+namespace parafem {
 
 
 double TrussMaterial::waveSpeed()

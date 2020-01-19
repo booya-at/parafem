@@ -5,6 +5,6 @@ find_package(VTK REQUIRED)
 include(${VTK_USE_FILE})
 
 add_library(vtkWriter SHARED vtkWriter.cpp)
-target_link_libraries(vtkWriter ${VTK_LIBRARIES} paraFEM)
+target_link_libraries(vtkWriter ${VTK_LIBRARIES} parafem)
 
 install(TARGETS vtkWriter DESTINATION lib)

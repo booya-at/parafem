@@ -35,16 +35,16 @@ int main(int argc, char **argv) {
 
 
     // DECLARATION
-    paraFEM::NodeVec grid;
-    paraFEM::ElementVec elements;
-    paraFEM::Membrane4Ptr m1;
+    parafem::NodeVec grid;
+    parafem::ElementVec elements;
+    parafem::Membrane4Ptr m1;
 
     int pos1;
     int pos2;
     int pos3;
     int pos4;
 
-    paraFEM::MembraneMaterialPtr mat (new paraFEM::MembraneMaterial(E, nue));
+    parafem::MembraneMaterialPtr mat (new parafem::MembraneMaterial(E, nue));
     mat->d_structural = structural_damping;
     mat->rho = rho;
     mat->d_velocity = velocity_damping;
@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
     {
         for (int y=0; y < num_nodes * 3; y++)
         {
-            grid.push_back(std::make_shared<paraFEM::Node>(x, y, 0));
+            grid.push_back(std::make_shared<parafem::Node>(x, y, 0));
             if (x==0 or x==num_nodes-1 or y==0 or y == num_nodes * 3 - 1)
                 grid.back()->fixed << 1, 1, 0;
         }
@@ -69,20 +69,20 @@ int main(int argc, char **argv) {
             pos2 = pos1 + 1;
             pos3 = pos2 + num_nodes * 3;
             pos4 = pos3 -1;
-            m1 = std::make_shared<paraFEM::Membrane4>(
-                    paraFEM::NodeVec{grid[pos1], grid[pos4], grid[pos3], grid[pos2]},
+            m1 = std::make_shared<parafem::Membrane4>(
+                    parafem::NodeVec{grid[pos1], grid[pos4], grid[pos3], grid[pos2]},
                     mat, reduced_integration);
-            m1->coordSys = paraFEM::CoordSys(m1->coordSys.n, paraFEM::Vector3(1, 0, 0));
+            m1->coordSys = parafem::CoordSys(m1->coordSys.n, parafem::Vector3(1, 0, 0));
             m1->pressure = pressure;
             elements.push_back(m1);
         }
     }
 
     // CASE
-    paraFEM::FemCasePtr c1 (new paraFEM::FemCase(elements));
+    parafem::FemCasePtr c1 (new parafem::FemCase(elements));
 
     // WRITER
-    paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/paraFEM/membrane4_2/int0output");
+    parafem::VtkWriter writer = parafem::VtkWriter("/tmp/parafem/membrane4_2/int0output");
 
     stepsize = std::get<0>(c1->get_explicit_max_time_step());
     stepsize /= 1.01;

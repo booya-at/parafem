@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-namespace paraFEM {
+namespace parafem {
 
 Truss::Truss(std::vector<NodePtr> points, std::shared_ptr<TrussMaterial> mat)
 {
@@ -13,18 +13,18 @@ Truss::Truss(std::vector<NodePtr> points, std::shared_ptr<TrussMaterial> mat)
     length = tangent.norm();
     tangent.normalize();
     material = mat;
-    nodes[0]->massInfluence += 0.5 * material->rho * length;
-    nodes[1]->massInfluence += 0.5 * material->rho * length;
+    nodes[0]->mass_influence += 0.5 * material->rho * length;
+    nodes[1]->mass_influence += 0.5 * material->rho * length;
     dViscous = length * material->waveSpeed() * material->rho * material->d_minMode;
     this->characteristicLength = length;
 }
 
-MaterialPtr Truss::getMaterial()
+MaterialPtr Truss::get_material()
 {
     return std::dynamic_pointer_cast<Material>(this->material);
 }
 
-void Truss::geometryStep() {
+void Truss::geometry_step() {
 
 }
 
@@ -77,9 +77,9 @@ void Truss::implicit_step(std::vector<trip> & Kt)
     }
 }
 
-Vector3 Truss::getStress()
+Vector3 Truss::get_stress()
 {
-    return stress * tangent;
+    return this->stress * this->tangent;
 };
 
 LineJoint::LineJoint(const std::vector<NodePtr> nodes, std::shared_ptr<TrussMaterial> material)
@@ -89,7 +89,7 @@ LineJoint::LineJoint(const std::vector<NodePtr> nodes, std::shared_ptr<TrussMate
     assert(nodes.size() > 3);
 }
 
-void LineJoint::geometryStep() {
+void LineJoint::geometry_step() {
 
 }
 
@@ -105,7 +105,7 @@ void LineJoint::explicit_step(double h)
     }
 }
 
-Vector3 LineJoint::getStress()
+Vector3 LineJoint::get_stress()
     {
         return Vector3(0, 0, 0);
     }

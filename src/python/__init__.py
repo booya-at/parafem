@@ -1,1 +1,1 @@
-from ._paraFEM import *
+from ._parafem import *

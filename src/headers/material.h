@@ -5,7 +5,7 @@
 #include "Eigen/Core"
 #include <memory>
 
-namespace paraFEM{
+namespace parafem{
 
 class Material: Base
 {

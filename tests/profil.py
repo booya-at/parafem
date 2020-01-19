@@ -6,7 +6,7 @@ from openglider.utils.distribution import Distribution
 
 import paraBEM.pan2d as bem
 import paraBEM
-import paraFEM as fem
+import parafem as fem
 
 import matplotlib.tri as mtri
 import matplotlib.pyplot as plt
@@ -90,7 +90,7 @@ for i in boundary[:-1]:
 # 6: case
 case = fem.Case(elements + lines)
 
-writer = fem.vtkWriter("/tmp/paraFEM/profil_test")
+writer = fem.vtkWriter("/tmp/parafem/profil_test")
 writer.writeCase(case, 0.0)
 
 steps = 10000
@@ -103,7 +103,7 @@ for i in range(steps):
     case.explicit_step(case.get_explicit_max_time_step()[0] / 2, ramp)
     if (i % 500) == 0:
         print(i)
-        line_forces.append([np.linalg.norm(l.getStress()) for l in lines])
+        line_forces.append([np.linalg.norm(l.get_stress()) for l in lines])
         writer.writeCase(case, 0.)
 
 plt.plot(line_forces)

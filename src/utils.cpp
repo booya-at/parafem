@@ -1,6 +1,6 @@
 #include "utils.h"
 
-namespace paraFEM {
+namespace parafem {
 
 
 bool is_finite(const Vector3 &x) {

@@ -9,17 +9,17 @@
 #include <vector>
 #include <tuple>
 
-namespace paraFEM
+namespace parafem
 {
 
 struct ForceConstraint
 {
-	virtual void updateForce() = 0;
+	virtual void update_force() = 0;
 };
 
 struct PositionConstraint
 {
-	virtual void updatePosition() = 0;
+	virtual void update_position() = 0;
 };
 
 struct FixConstraint: public PositionConstraint
@@ -27,7 +27,7 @@ struct FixConstraint: public PositionConstraint
 	std::vector<NodePtr> points;
 	FixConstraint(std::vector<NodePtr>, Eigen::Vector3d fix);
 	Eigen::Vector3d fix;
-	virtual void updatePosition() = 0;
+	virtual void update_position() = 0;
 };
 
 struct SymmetricPosition: public PositionConstraint
@@ -37,7 +37,7 @@ struct SymmetricPosition: public PositionConstraint
 	std::vector<std::array<NodePtr, 2>> sym_points;
 	Eigen::Vector3d mirror_point, mirror_normal;
 	SymmetricPosition(std::vector<NodePtr> points, Eigen::Vector3d mirror_point, Eigen::Vector3d mirror_normal);
-	virtual void updatePosition() = 0;
+	virtual void update_position() = 0;
 };
 
 struct SymmetricForce: public ForceConstraint
@@ -46,7 +46,7 @@ struct SymmetricForce: public ForceConstraint
 	std::vector<NodePtr> sym_points; 
 	Eigen::Vector3d mirror_point, mirror_normal;
 	SymmetricForce(std::vector<NodePtr> points, Eigen::Vector3d mirror_point, Eigen::Vector3d mirror_normal);
-	virtual void updateForce() = 0;
+	virtual void update_force() = 0;
 };
 
 

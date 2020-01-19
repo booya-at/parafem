@@ -3,7 +3,7 @@
 
 #include "Eigen/Core"
 
-namespace paraFEM {
+namespace parafem {
 
 typedef Eigen::Vector3d Vector3;
 typedef Eigen::Vector2d Vector2;

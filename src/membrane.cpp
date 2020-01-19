@@ -2,9 +2,9 @@
 #include <iostream>
 #include "utils.h"
 
-namespace paraFEM {
+namespace parafem {
 
-MaterialPtr Membrane::getMaterial()
+MaterialPtr Membrane::get_material()
 {
     return std::dynamic_pointer_cast<Material>(this->material);
 }
@@ -47,9 +47,9 @@ Membrane3::Membrane3(std::vector<NodePtr> points, std::shared_ptr<MembraneMateri
     int row_count = 0;
     for (auto node: nodes)
     {
-        pos_mat.row(row_count) = coordSys.toLocal(node->position - center);
-        vel_mat.row(row_count) = coordSys.toLocal(node->velocity);
-        node->massInfluence += material->rho * area / nodes.size();
+        pos_mat.row(row_count) = coordSys.to_local(node->position - center);
+        vel_mat.row(row_count) = coordSys.to_local(node->velocity);
+        node->mass_influence += material->rho * area / nodes.size();
         row_count ++;
     }
     stress.setZero();
@@ -66,7 +66,7 @@ Membrane3::Membrane3(std::vector<NodePtr> points, std::shared_ptr<MembraneMateri
     characteristicLength = smallestSide;
 }
 
-void Membrane3::geometryStep() {
+void Membrane3::geometry_step() {
     this->calculate_center();
 
 
@@ -83,7 +83,7 @@ void Membrane3::geometryStep() {
     int row_count = 0;
     for (auto node: this->nodes)
     {
-        new_pos_mat.row(row_count) = this->coordSys.toLocal(node->position - this->center);
+        new_pos_mat.row(row_count) = this->coordSys.to_local(node->position - this->center);
         row_count ++;
     }
 
@@ -93,8 +93,8 @@ void Membrane3::geometryStep() {
     row_count = 0;
     for (auto node: nodes)
     {
-        this->pos_mat.row(row_count) = coordSys.toLocal(node->position - center);
-        this->vel_mat.row(row_count) = coordSys.toLocal(node->velocity);
+        this->pos_mat.row(row_count) = coordSys.to_local(node->position - center);
+        this->vel_mat.row(row_count) = coordSys.to_local(node->velocity);
         row_count ++;
     }
 
@@ -103,6 +103,7 @@ void Membrane3::geometryStep() {
     // 2: B-matrix
     this->dN << -1, 1, 0,
                 -1, 0, 1;
+
     this->B = (this->dN * this->pos_mat).inverse() * this->dN;
 
 }
@@ -148,7 +149,7 @@ void Membrane3::explicit_step(double h)
                              +  this->B(1, i) * (local_force(2) + structural_damping(2));
         local_node_force.y() += this->B(1, i) * (local_force(1) + structural_damping(1) + hydrostatic_damping(1))
                              +  this->B(0, i) * (local_force(2) + structural_damping(2));
-        this->nodes[i]->internal_force += this->coordSys.toGlobal(local_node_force);
+        this->nodes[i]->internal_force += this->coordSys.to_global(local_node_force);
     }
     Vector3 force_cp = this->pressure / nodes.size() * this->coordSys.n;
     double damping = this->material->d_velocity * this->area / this->nodes.size();
@@ -163,7 +164,7 @@ void Membrane3::explicit_step(double h)
     
 }
 
-Vector3 Membrane3::getStress()
+Vector3 Membrane3::get_stress()
 {
     return stress;
 };
@@ -190,9 +191,9 @@ Membrane4::Membrane4(std::vector<NodePtr> points,
     int row_count = 0;
     for (auto node: nodes)
     {
-        pos_mat.row(row_count) = coordSys.toLocal(node->position - center);
-        vel_mat.row(row_count) = coordSys.toLocal(node->velocity);
-        node->massInfluence += material->rho * area / nodes.size();
+        pos_mat.row(row_count) = coordSys.to_local(node->position - center);
+        vel_mat.row(row_count) = coordSys.to_local(node->velocity);
+        node->mass_influence += material->rho * area / nodes.size();
         row_count ++;
     }
     if (reduced_integration)
@@ -243,7 +244,7 @@ void Membrane4::initHG()
     hg_gamma = h - (h.dot(pos_mat.col(0)) * B0 + h.dot(pos_mat.col(0)) * B1);
 }
 
-void Membrane4::geometryStep() {
+void Membrane4::geometry_step() {
     this->calculate_center();
 
     // 1: new coordSys
@@ -259,7 +260,7 @@ void Membrane4::geometryStep() {
     int row_count = 0;
     for (auto node: this->nodes)
     {
-        new_pos_mat.row(row_count) = this->coordSys.toLocal(node->position - this->center);
+        new_pos_mat.row(row_count) = this->coordSys.to_local(node->position - this->center);
         row_count ++;
     }
 
@@ -270,8 +271,8 @@ void Membrane4::geometryStep() {
     row_count = 0;
     for (auto node: this->nodes)
     {
-        this->pos_mat.row(row_count) = this->coordSys.toLocal(node->position - this->center);
-        this->vel_mat.row(row_count) = this->coordSys.toLocal(node->velocity);
+        this->pos_mat.row(row_count) = this->coordSys.to_local(node->position - this->center);
+        this->vel_mat.row(row_count) = this->coordSys.to_local(node->velocity);
         row_count ++;
     }
 
@@ -329,7 +330,7 @@ void Membrane4::explicit_step(double h)
                                      +  B(1, i) * (local_force(2) + structural_damping(2));
                 local_node_force.y() += B(1, i) * (local_force(1) + structural_damping(1) + hydrostatic_damping(1))
                                      +  B(0, i) * (local_force(2) + structural_damping(2));
-                nodes[i]->internal_force += int_point.weight * coordSys.toGlobal(local_node_force);
+                nodes[i]->internal_force += int_point.weight * coordSys.to_global(local_node_force);
             }
 
     }
@@ -356,7 +357,7 @@ void Membrane4::explicit_step(double h)
             local_node_force.setZero();
             local_node_force.x() += hg_gamma[i] * hg_stress.x();
             local_node_force.y() += hg_gamma[i] * hg_stress.y();
-            nodes[i]->internal_force += coordSys.toGlobal(local_node_force);
+            nodes[i]->internal_force += coordSys.to_global(local_node_force);
         }
     }
 
@@ -365,7 +366,7 @@ void Membrane4::explicit_step(double h)
     }
 }
 
-Vector3 Membrane4::getStress()
+Vector3 Membrane4::get_stress()
 {
     Vector3 stress;
     stress.setZero();

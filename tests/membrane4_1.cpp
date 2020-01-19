@@ -30,10 +30,10 @@ int main(int argc, char **argv) {
     //INTEGRATION
     bool reduced_integration = true;
 
-    paraFEM::NodePtr n1 (new paraFEM::Node(0, 0, 0));
-    paraFEM::NodePtr n2 (new paraFEM::Node(1, 0, 0));
-    paraFEM::NodePtr n3 (new paraFEM::Node(1, 1, 0));
-    paraFEM::NodePtr n4 (new paraFEM::Node(0, 1, 0));
+    parafem::NodePtr n1 (new parafem::Node(0, 0, 0));
+    parafem::NodePtr n2 (new parafem::Node(1, 0, 0));
+    parafem::NodePtr n3 (new parafem::Node(1, 1, 0));
+    parafem::NodePtr n4 (new parafem::Node(0, 1, 0));
 
     n1->fixed << 0, 0, 0;
     n4->fixed << 0, 0, 0;
@@ -41,14 +41,14 @@ int main(int argc, char **argv) {
     n2->external_force << force/2, 0, 0;
     n3->external_force << force/2, 0, 0;
   
-    std::shared_ptr<paraFEM::MembraneMaterial> mat (new paraFEM::MembraneMaterial(E, nue));
+    std::shared_ptr<parafem::MembraneMaterial> mat (new parafem::MembraneMaterial(E, nue));
     mat->d_structural = structural_damping;
     mat->d_velocity = velocity_damping;
 
-    paraFEM::Membrane4Ptr m1 (new paraFEM::Membrane4(paraFEM::NodeVec{n1, n2, n3, n4}, mat, reduced_integration));
-    paraFEM::FemCasePtr c1 (new paraFEM::FemCase(paraFEM::ElementVec{m1}));
+    parafem::Membrane4Ptr m1 (new parafem::Membrane4(parafem::NodeVec{n1, n2, n3, n4}, mat, reduced_integration));
+    parafem::FemCasePtr c1 (new parafem::FemCase(parafem::ElementVec{m1}));
 
-    paraFEM::VtkWriter writer = paraFEM::VtkWriter("/tmp/paraFEM/membrane4_1/output");
+    parafem::VtkWriter writer = parafem::VtkWriter("/tmp/parafem/membrane4_1/output");
 
     for (int i=0; i<iterations; i++)
     {
@@ -56,8 +56,8 @@ int main(int argc, char **argv) {
         if (i % int(iterations / num_export) == 0)
             writer.writeCase(c1, 0.3);
     }
-    cout << "spannung in x richtung: " << m1->getStress().x() << endl;
-    cout << "spannung in y richtung: " << m1->getStress().y() << endl;
+    cout << "spannung in x richtung: " << m1->get_stress().x() << endl;
+    cout << "spannung in y richtung: " << m1->get_stress().y() << endl;
     cout << "verschiebung in x richtung: " << n2->position.x()-1 << endl;
     cout << "fehler bei der Verschiebung: " << n2->position.x() - 2.718281828459  << endl;
 }

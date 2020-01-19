@@ -3,7 +3,7 @@
 #include <algorithm>    // std::max
 #include "omp.h"
 
-namespace paraFEM {
+namespace parafem {
 
 FemCase::FemCase(std::vector<ElementPtr> elements, 
                  std::vector<PositionConstraintPtr> pos_constraints,
@@ -35,7 +35,7 @@ std::tuple<double, ElementPtr> FemCase::get_explicit_max_time_step()
     ElementPtr badElement;
     for (auto element: this->elements)
     {
-        elTimeStep = element->characteristicLength / element->getMaterial()->waveSpeed();
+        elTimeStep = element->characteristicLength / element->get_material()->waveSpeed();
         if (elTimeStep < maxTimeStep and elTimeStep != 0)
         {
             badElement = element;
@@ -45,7 +45,7 @@ std::tuple<double, ElementPtr> FemCase::get_explicit_max_time_step()
     return std::make_tuple(maxTimeStep, badElement);
 }
 
-double FemCase::getMaxVelocity() {
+double FemCase::get_max_velocity() {
     double velocity = 0;
     for (auto node: this->get_nodes()) {
         velocity = std::max(velocity, node->velocity.norm());
@@ -62,7 +62,7 @@ void FemCase::explicit_step(double h, double external_factor)
     #pragma omp parallel for
     for (int i=0; i<this->elements.size(); i++) {
         auto element = elements[i];
-        element->geometryStep();
+        element->geometry_step();
     }
 
     for(int i = 0; i < elements.size(); i++)
@@ -81,28 +81,24 @@ void FemCase::explicit_step(double h, double external_factor)
     
 }
 
-// void FemCase::implicit_step(double h, double external_factor)
-// {
-//     time += h;
-//     auto node_cp = this->get_nodes();
-//     Eigen::Triplet<double> Kt, Dt, Mt;
-//     Eigen::MatrixXd K, D, M;
+void FemCase::apply_forces()
+{
+    std::vector<trip> Kt;
 
-// #pragma omp parallel for
-//     for(int j = 0; j < elements.size(); j++)
-//     {
-//         auto element = elements[j];
-//         element->implicit_step(h, Kt, Dt, Mt);
-//     }
-//     // create global matrices from triplets
+    #pragma omp parallel for
+    for(int j = 0; j < elements.size(); j++)
+    {
+        auto element = elements[j];
+        element->implicit_step(Kt);
+    }
 
-//     // solve equilibrium equation
+    // applying forces
+    // apply boundary conditions
+    // solve system -> u, residuals
+    // apply forces
+    // add residuals to nodes.
 
-//     // set new positions
-
-//     // integrate force
-    
-// }
+}
 
 NodeVec FemCase::get_nodes()
 {

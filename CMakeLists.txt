@@ -9,6 +9,7 @@ SET(CMAKE_CXX_FLAGS_RELEASE "-O3")
 OPTION(BUILD_TESTS "test require vtk" ON)
 OPTION(BUILD_PYTHON_BINDINGS "create python bindings" ON)
 OPTION(BUILD_JSON "json in out" ON)
+OPTION(BUILD_VTK_WRITER "build the included vtkWriter" ON)
 
 # DEPENDENCIES
 FIND_PACKAGE(OpenMP)

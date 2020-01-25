@@ -14,15 +14,15 @@ int main(int argc, char **argv) {
     int num_nodes = 50; // num_nodes x num_nodes
 
     // SIM
-    double stepsize = 0.001;
+    double stepsize = 0.005;
     int iterations = 5000;
     int num_export = 50;
     
     // MATERIAL
     double E = 1000;
-    double nue = 0.1;
+    double nue = 0.3;
     double structural_damping = 1. / E;
-    double velocity_damping = 0.2;
+    double velocity_damping = 0.4;
     double rho = 0.1;
     
     // FORCE
@@ -84,9 +84,6 @@ int main(int argc, char **argv) {
     // WRITER
     parafem::VtkWriter writer = parafem::VtkWriter("/tmp/parafem/membrane4_2/int0output");
 
-    stepsize = std::get<0>(c1->get_explicit_max_time_step());
-    stepsize /= 1.01;
-    iterations = 5 / stepsize;
     // LOOP;
     for (int i=0; i<iterations; i++)
     {

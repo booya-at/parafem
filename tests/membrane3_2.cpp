@@ -15,14 +15,14 @@ int main(int argc, char **argv) {
 
     // SIM
     double stepsize = 0.005;
-    int iterations = 500;
+    int iterations = 1000;
     int num_export = 100;
     
     // MATERIAL
     double E = 1000;
     double nue = 0.3;
     double structural_damping = 1. / E;
-    double velocity_damping = 0.5;
+    double velocity_damping = 0.8;
     double rho = 0.1;
     
     // FORCE

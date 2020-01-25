@@ -77,6 +77,11 @@ void Truss::implicit_step(std::vector<trip> & Kt)
     }
 }
 
+void Truss::implicit_stresses()
+{
+    
+}
+
 Vector3 Truss::get_stress()
 {
     return this->stress * this->tangent;
@@ -91,6 +96,15 @@ LineJoint::LineJoint(const std::vector<NodePtr> nodes, std::shared_ptr<TrussMate
 
 void LineJoint::geometry_step() {
 
+}
+
+void LineJoint::implicit_step(std::vector<trip> & Kt)
+{
+    
+}
+
+void LineJoint::implicit_stresses()
+{
 }
 
 void LineJoint::explicit_step(double h)

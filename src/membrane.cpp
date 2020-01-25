@@ -169,6 +169,15 @@ Vector3 Membrane3::get_stress()
     return stress;
 };
 
+void Membrane3::implicit_step(std::vector<trip>& Kt)
+{
+}
+
+void Membrane3::implicit_stresses()
+{
+    
+}
+
 
 Membrane4::Membrane4(std::vector<NodePtr> points, 
                      std::shared_ptr<MembraneMaterial> mat,
@@ -373,6 +382,14 @@ Vector3 Membrane4::get_stress()
     for (auto int_point: integration_points)
         stress += int_point.stress * int_point.weight;
     return stress;
-};
+}
+
+void Membrane4::implicit_step(std::vector<trip> & Kt)
+{
+}
+
+void Membrane4::implicit_stresses()
+{
+}
 
 }

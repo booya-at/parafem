@@ -53,7 +53,7 @@ struct Element: Base
     virtual void geometry_step() = 0;
     virtual void explicit_step(double h) = 0;  // compute the internal forces acting on the nodes.
     virtual void implicit_step(std::vector<trip> & Kt) = 0;
-    virtual void implicit_stresses();
+    virtual void implicit_stresses() = 0;
     std::vector<int> get_number();
     virtual Vector3 get_stress()=0;
     bool is_valid = true;
@@ -73,6 +73,7 @@ struct Truss: public Element
     virtual void geometry_step();
     virtual void explicit_step(double h);
     virtual void implicit_step(std::vector<trip> & Kt);
+    virtual void implicit_stresses();
     std::shared_ptr<TrussMaterial> material;
     void add_nodal_pressure(Vector3);
     MaterialPtr get_material();
@@ -85,6 +86,7 @@ struct LineJoint: public Element
     virtual void geometry_step();
     virtual void explicit_step(double h);
     virtual void implicit_step(std::vector<trip> & Kt);
+    virtual void implicit_stresses();
     virtual Vector3 get_stress();
     std::shared_ptr<TrussMaterial> material;
 };
@@ -98,6 +100,10 @@ struct Membrane: public Element
 
     Vector3 calculate_center();
     
+    virtual void explicit_step(double h) = 0;
+    virtual void implicit_step(std::vector<trip> & Kt) = 0;
+    virtual void implicit_stresses() = 0;
+    
     std::shared_ptr<MembraneMaterial> material;
     MaterialPtr get_material();
 };
@@ -108,6 +114,7 @@ struct Membrane3: public Membrane
     virtual void geometry_step();
     virtual void explicit_step(double h);
     virtual void implicit_step(std::vector<trip> & Kt);
+    virtual void implicit_stresses();
     Vector3 stress;
     virtual Vector3 get_stress();
 
@@ -120,8 +127,9 @@ struct Membrane4: public  Membrane
     Membrane4(const std::vector<NodePtr>, std::shared_ptr<MembraneMaterial>, bool reduced_integration=true);
     std::vector<IntegrationPoint> integration_points;  //eta, zeta, weight, stress
     virtual void geometry_step();
-    virtual void implicit_step(std::vector<trip> & Kt);
     virtual void explicit_step(double h);
+    virtual void implicit_step(std::vector<trip> & Kt);
+    virtual void implicit_stresses();
     
     // hourglass control
     void initHG();

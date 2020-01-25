@@ -31,7 +31,7 @@ Deformation of glider due to aerodynamic forces acting on membrane-elements
 
 ### Computing line-forces
 
-Computing the forces having an impact on line-geometry and line-lengths
+Computing the top line forces which influence the line-geometry and line-lengths:
 
 <img src="./images/line-forces.png" alt="result" width="600"/>
 
